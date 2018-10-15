@@ -7,7 +7,7 @@ stmt -> set id expr
         | ifelse (expresion) opt_stmts opt_stmts
         | while (expresion) opt_stmts
 
-opt stmts -> {} | {stmt_lst} | instr
+opt_stmts -> {} | {stmt_lst} | instr
 
 stmt_lst -> instr | instr stmt_lst
 

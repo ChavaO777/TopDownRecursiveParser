@@ -282,7 +282,7 @@ void terminateProgram(){
 
 void printErrorMessage(int errorCode, char* currFunction, char* errorMesssage){
 
-    printf("Error %d at function '%s': %s\n", errorCode, currFunction, errorMesssage);
+    printf("Error %d at input line %d, function '%s': %s\n", errorCode, global_curr_parsed_line, currFunction, errorMesssage);
     printf("no\n");
     terminateProgram();
 }
@@ -310,7 +310,7 @@ void readNextToken(){
         
     } while(!isPrintableToken(global_token_code));
 
-    printLastToken("");
+    // printLastToken("");
 }
 
 void expr();
@@ -320,7 +320,7 @@ void stmt_lst();
 void factor(){
 
     readNextToken();
-    printLastToken("factor");
+    // printLastToken("factor");
 
     if(global_token_code == SYMBOL_LT_PARENTHESES){
 
@@ -450,7 +450,7 @@ void instr(void caller()){
 void stmt_lst(){
 
     readNextToken();
-    printLastToken("stmt_lst");
+    // printLastToken("stmt_lst");
 
     // If after a few recursive loops we finish the list of statements (stmt_lst),
     // it's time to stop the recursion to close the optional statements (opt_stmts) 
