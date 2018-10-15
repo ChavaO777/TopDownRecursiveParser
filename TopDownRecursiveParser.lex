@@ -14,6 +14,12 @@
  * 
  * @author Salvador Orozco Villalever - A07104218
  * @version 09/13/2018
+ * 
+ * Instructions for compiling and executing the program:
+ * 
+ * 1. flex <PATH_TO_LEX_FILE>
+ * 2. gcc <PATH_TO_ "lex.yy.c" FILE> -ll
+ * 3. ./a.out
  */ 
 
 %{
@@ -119,6 +125,8 @@ ifelse                                                  { return RES_WORD_IFELSE
 
 .                                                       { return 1100; } /* Anything else */
 %%
+
+// ################# LEXICAL ANALIZER #################
 
 /**
  * Function that handles the printing of codes for reserved words.
@@ -243,6 +251,13 @@ void handlePrintableTokens(int code){
 int isPrintableCharacter(int code){
 
     return code >= 0;
+}
+
+// ################# SYNTAX ANALIZER #################
+
+void prog(){
+
+    
 }
 
 /**
