@@ -57,7 +57,8 @@
 #define SYMBOL_RT_PARENTHESES   115
 #define SYMBOL_LT_BRACKET       116
 #define SYMBOL_RT_BRACKET       117
-#define SYMBOL_SPACE            118
+#define SYMBOL_SPACE            -118
+#define NEW_LINE                -119
 
 /* Integer numbers */
 #define INTEGER_NUMBER          200
@@ -126,10 +127,22 @@ ifelse                                                  { return RES_WORD_IFELSE
 
 " "                                                     { return SYMBOL_SPACE; }
 
+"\n"                                                     { return NEW_LINE; }
+
 .                                                       { return 1100; } /* Anything else */
 %%
 
 // ################# LEXICAL ANALIZER #################
+
+// Error codes
+
+#define ERR_CODE_RT_PARENTHESES                         0
+#define ERR_CODE_LT_PARENTHESES_IDENTIFIER_NUMBER       1
+#define ERR_CODE_IDENTIFIER                             2
+#define ERR_CODE_SET_IF_IFELSE_WHILE                    3
+#define ERR_CODE_SEMI_COLON                             4
+#define ERR_CODE_RT_BRACKET                             5
+#define ERR_CODE_PROGRAM                                6
 
 /**
  * Function that handles the printing of codes for reserved words.
@@ -260,17 +273,28 @@ int isPrintableCharacter(int code){
 
 // Global variable to store the code of each token to be read.
 int global_token_code = -1;
+int global_curr_parsed_line = 1;
 
 void terminateProgram(){
 
     exit(0);
 }
 
-void printErrorMessage(char* errorMesssage){
+void printErrorMessage(int errorCode, char* currFunction, char* errorMesssage){
 
-    printf("Error! %s\n", errorMesssage);
+    printf("Error %d at function '%s': %s\n", errorCode, currFunction, errorMesssage);
     printf("no\n");
     terminateProgram();
+}
+
+void printLastToken(char *readAtFunctionName){
+
+    printf("Read at function '%s'; currToken = %s; at line = %d, global_token_code = %d\n", readAtFunctionName, yytext, global_curr_parsed_line, global_token_code);
+}
+
+int isPrintableToken(int tokenCode){
+
+    return tokenCode >= 0;
 }
 
 /**
@@ -280,15 +304,23 @@ void readNextToken(){
 
     do{
         global_token_code = yylex();
-    } while(global_token_code == SYMBOL_SPACE);
+
+        if(global_token_code == NEW_LINE)
+            global_curr_parsed_line++;
+        
+    } while(!isPrintableToken(global_token_code));
+
+    printLastToken("");
 }
 
 void expr();
 void term();
+void stmt_lst();
 
 void factor(){
 
     readNextToken();
+    printLastToken("factor");
 
     if(global_token_code == SYMBOL_LT_PARENTHESES){
 
@@ -298,14 +330,14 @@ void factor(){
         // If we saw a left parentheses, we should see a right parentheses afterwards.
         if(global_token_code != SYMBOL_RT_PARENTHESES){
 
-            printErrorMessage("Expected a right parentheses.");
+            printErrorMessage(ERR_CODE_RT_PARENTHESES, "factor", "Expected a right parentheses.");
         }
     } 
     // If we didn't see a parentheses, we should've seen an identifier or 
     // an integer number
     else if(global_token_code != IDENTIFIER && global_token_code != INTEGER_NUMBER){
 
-        printErrorMessage("Expected a left parentheses, an identifier or a number.");
+        printErrorMessage(ERR_CODE_LT_PARENTHESES_IDENTIFIER_NUMBER, "factor", "Expected a left parentheses, an identifier or a number.");
     }
 }
 
@@ -321,6 +353,8 @@ void term_(){
 }
 
 void expr_(){
+
+    readNextToken();
 
     if(global_token_code == SYMBOL_PLUS || global_token_code == SYMBOL_MINUS){
 
@@ -352,13 +386,20 @@ void handleSet(){
     }
     else{
 
-        printErrorMessage("Expected an identifier.");
+        printErrorMessage(ERR_CODE_IDENTIFIER, "handleSet", "Expected an identifier.");
     }
 }
 
-void stmt(){
+void stmt(void caller()){
 
-    readNextToken();
+    // If you came from 'instr', DO NOT read a token here.
+    // The token was read in that caller function.
+    if(caller != stmt_lst){
+
+        readNextToken();
+        printLastToken("stmt");
+
+    }
 
     switch(global_token_code){
 
@@ -379,13 +420,18 @@ void stmt(){
         //     break;
 
         default:
-            printErrorMessage("Expected one of 'set', 'if', 'ifelse' and 'while'.");
+            printErrorMessage(ERR_CODE_SET_IF_IFELSE_WHILE, "stmt", "Expected one of 'set', 'if', 'ifelse' and 'while'.");
     }
 }
 
-void instr(){
+void instr(void caller()){
 
-    readNextToken();
+    // If you came from 'stmt_lst', DO NOT read a token here.
+    // The token was read in that caller function.
+    if(caller != stmt_lst){
+
+        readNextToken();
+    }
 
     if(global_token_code == SYMBOL_SEMI_COLON){
 
@@ -393,17 +439,18 @@ void instr(){
     }
     else{
 
-        stmt();
+        stmt(caller);
         readNextToken();
 
         if(global_token_code != SYMBOL_SEMI_COLON)
-            printErrorMessage("Expected a semi-colon");
+            printErrorMessage(ERR_CODE_SEMI_COLON, "instr", "Expected a semi-colon");
     }
 }
 
 void stmt_lst(){
 
     readNextToken();
+    printLastToken("stmt_lst");
 
     // If after a few recursive loops we finish the list of statements (stmt_lst),
     // it's time to stop the recursion to close the optional statements (opt_stmts) 
@@ -411,7 +458,7 @@ void stmt_lst(){
     if(global_token_code == SYMBOL_RT_BRACKET)
         return;
 
-    instr();
+    instr(stmt_lst);
     stmt_lst();
 }
 
@@ -432,14 +479,14 @@ void opt_stmts(){
         }   
         else{ 
 
-            printErrorMessage("Expected a right bracket.");
+            printErrorMessage(ERR_CODE_RT_BRACKET, "opt_stmts", "Expected a right bracket.");
         }
     }
     else{
 
         // If we didn't see a left bracket, we must see an instruction.
         // This should be the end of the program.
-        instr();
+        instr(opt_stmts);
         printf("sí.\n");
     }
 }
@@ -459,12 +506,12 @@ void prog(){
         }
         else{
 
-            printErrorMessage("Expected an identifier.");
+            printErrorMessage(ERR_CODE_IDENTIFIER, "prog", "Expected an identifier.");
         }
     }
     else{
 
-        printErrorMessage("Expected the token 'program'.");
+        printErrorMessage(ERR_CODE_PROGRAM, "prog", "Expected the token 'program'.");
     }
 }
 
