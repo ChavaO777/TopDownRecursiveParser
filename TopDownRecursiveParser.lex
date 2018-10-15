@@ -258,45 +258,70 @@ int isPrintableCharacter(int code){
 
 // ################# SYNTAX ANALIZER #################
 
+// Global variable to store the code of each token to be read.
+int global_token_code = -1;
+
 void printErrorMessage(char* errorMesssage){
 
-    printf("%s\n", errorMesssage);
+    printf("Error! %s\n", errorMesssage);
+    printf("no\n");
 }
 
-void skipSpaces(int *ptrCode){
+void skipSpaces(){
 
     do{
-        *ptrCode = yylex();
-    } while(*ptrCode == SYMBOL_SPACE);
+        global_token_code = yylex();
+    } while(global_token_code == SYMBOL_SPACE);
+}
+
+void opt_stmts(){
+
+    skipSpaces();
+
+    // Left parentheses
+    if(global_token_code == SYMBOL_LT_PARENTHESES){
+
+        // stmt_lst();
+
+        skipSpaces();
+
+        // If we saw a left parentheses, there must be a right parentheses afterwards.
+        if(global_token_code == SYMBOL_RT_PARENTHESES){
+
+            printf("sí.\n");
+        }   
+        else{ 
+
+            printErrorMessage("Expected a right parentheses.");
+        }
+    }
+    else{
+
+        // instr();
+    }
 }
 
 void prog(){
 
-    // Variable to store the code of each token to be read.
-    int code = -1;
-
     // Read the next token
-    code = yylex();
-    printf("1 code = %d\n", code);
+    global_token_code = yylex();
 
-    if (code == RES_WORD_PROGRAM) {
+    if (global_token_code == RES_WORD_PROGRAM) {
 
-        skipSpaces(&code);
+        skipSpaces();
 
-        printf("2 code = %d\n", code);
-
-        if (code == IDENTIFIER) {
+        if (global_token_code == IDENTIFIER) {
 
             // opt_stmts();
         }
         else{
 
-            printErrorMessage("Error. Expected an identifier.");
+            printErrorMessage("Expected an identifier.");
         }
     }
     else{
 
-        printErrorMessage("Error. Expected the token 'program'.");
+        printErrorMessage("Expected the token 'program'.");
     }
 }
 
