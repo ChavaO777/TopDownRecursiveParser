@@ -57,6 +57,7 @@
 #define SYMBOL_RT_PARENTHESES   115
 #define SYMBOL_LT_BRACKET       116
 #define SYMBOL_RT_BRACKET       117
+#define SYMBOL_SPACE            118
 
 /* Integer numbers */
 #define INTEGER_NUMBER          200
@@ -122,6 +123,8 @@ ifelse                                                  { return RES_WORD_IFELSE
 <<EOF>>                                                 { return END_OF_FILE; } /* End-of-file */
 
 [/]+.*                                                  { printf(""); } /* Comment */
+
+" "                                                     { return SYMBOL_SPACE; }
 
 .                                                       { return 1100; } /* Anything else */
 %%
@@ -255,9 +258,46 @@ int isPrintableCharacter(int code){
 
 // ################# SYNTAX ANALIZER #################
 
+void printErrorMessage(char* errorMesssage){
+
+    printf("%s\n", errorMesssage);
+}
+
+void skipSpaces(int *ptrCode){
+
+    do{
+        *ptrCode = yylex();
+    } while(*ptrCode == SYMBOL_SPACE);
+}
+
 void prog(){
 
-    
+    // Variable to store the code of each token to be read.
+    int code = -1;
+
+    // Read the next token
+    code = yylex();
+    printf("1 code = %d\n", code);
+
+    if (code == RES_WORD_PROGRAM) {
+
+        skipSpaces(&code);
+
+        printf("2 code = %d\n", code);
+
+        if (code == IDENTIFIER) {
+
+            // opt_stmts();
+        }
+        else{
+
+            printErrorMessage("Error. Expected an identifier.");
+        }
+    }
+    else{
+
+        printErrorMessage("Error. Expected the token 'program'.");
+    }
 }
 
 /**
@@ -265,30 +305,32 @@ void prog(){
  */ 
 int main(){
 
-    // Variable to store the code of each token to be read.
-    int code = -1;
+    prog();
+
+    // // Variable to store the code of each token to be read.
+    // int code = -1;
     
-    while(1){
+    // while(1){
         
-        code = yylex();
+    //     code = yylex();
 
-        // If this is the end of the file, stop here.
-        if(code == END_OF_FILE)
-            break;
+    //     // If this is the end of the file, stop here.
+    //     if(code == END_OF_FILE)
+    //         break;
 
-        switch(isPrintableCharacter(code)){
+    //     switch(isPrintableCharacter(code)){
 
-            case 0:
-                handleNonPrintableTokens(code);
-                break;
+    //         case 0:
+    //             handleNonPrintableTokens(code);
+    //             break;
 
-            case 1:
-                handlePrintableTokens(code);
-                break;
-        }
-    }
+    //         case 1:
+    //             handlePrintableTokens(code);
+    //             break;
+    //     }
+    // }
 
-    printf("\n");
+    // printf("\n");
 
     return 0;
 }
