@@ -261,10 +261,16 @@ int isPrintableCharacter(int code){
 // Global variable to store the code of each token to be read.
 int global_token_code = -1;
 
+void terminateProgram(){
+
+    exit(0);
+}
+
 void printErrorMessage(char* errorMesssage){
 
     printf("Error! %s\n", errorMesssage);
     printf("no\n");
+    terminateProgram();
 }
 
 void skipSpaces(){
@@ -276,7 +282,20 @@ void skipSpaces(){
 
 void instr(){
 
-    
+    skipSpaces();
+
+    if(global_token_code == SYMBOL_SEMI_COLON){
+
+        return;
+    }
+    else{
+
+        // stmt();
+        skipSpaces();
+
+        if(global_token_code != SYMBOL_SEMI_COLON)
+            printErrorMessage("Expected a semi-colon");
+    }
 }
 
 void stmt_lst(){
