@@ -1,0 +1,30 @@
+Grammar:
+
+prog -> program id opt_stmts
+
+stmt -> set id expr
+        | if (expresion) opt stmts
+        | ifelse (expresion) opt_stmts opt_stmts
+        | while (expresion) opt_stmts
+
+opt stmts -> {} | {stmt lst} | instr
+
+stmt_lst -> instr | stmt_lst instr
+
+instr -> ; |  stmt;
+
+expr -> expr + term
+        | expr - term
+        | term
+
+term -> term * factor
+        | term / factor
+        | factor
+
+factor -> (expr)
+        | id
+        | num
+
+expresion -> expr < expr
+        | expr > expr
+        | expr = expr
