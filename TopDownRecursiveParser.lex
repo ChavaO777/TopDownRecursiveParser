@@ -28,6 +28,9 @@
 #define RES_WORD_REPEAT         7
 #define RES_WORD_UNTIL          8
 #define RES_WORD_PROGRAM        9
+#define RES_WORD_SET            10
+#define RES_WORD_IF             11
+#define RES_WORD_IFELSE         12
 
 /* Symbols */
 #define SYMBOL_COLON_EQ         100 
@@ -39,7 +42,15 @@
 #define SYMBOL_COLON            106                                          
 #define SYMBOL_LEQ              107                                       
 #define SYMBOL_GEQ              108                                            
-#define SYMBOL_NEQ              109                                     
+#define SYMBOL_NEQ              109
+#define SYMBOL_PLUS             110
+#define SYMBOL_MINUS            111
+#define SYMBOL_STAR             112
+#define SYMBOL_FORWARD_SLASH    113
+#define SYMBOL_LT_PARENTHESES   114
+#define SYMBOL_RT_PARENTHESES   115
+#define SYMBOL_LT_BRACKET       116
+#define SYMBOL_RT_BRACKET       117
 
 /* Integer numbers */
 #define INTEGER_NUMBER          200
@@ -73,6 +84,9 @@ end                                                     { return RES_WORD_END; }
 repeat                                                  { return RES_WORD_REPEAT; }
 until                                                   { return RES_WORD_UNTIL; }
 program                                                 { return RES_WORD_PROGRAM; }
+set                                                     { return RES_WORD_SET; }
+if                                                      { return RES_WORD_IF; }
+ifelse                                                  { return RES_WORD_IFELSE; }
 
 ":="                                                    { return SYMBOL_COLON_EQ; } /* Symbols */
 "="                                                     { return SYMBOL_EQ; }
@@ -84,6 +98,14 @@ program                                                 { return RES_WORD_PROGRA
 "<="                                                    { return SYMBOL_LEQ; }
 ">="                                                    { return SYMBOL_GEQ; }
 "!="                                                    { return SYMBOL_NEQ; }
+"+"                                                     { return SYMBOL_PLUS; }
+"-"                                                     { return SYMBOL_MINUS; }
+"*"                                                     { return SYMBOL_STAR; }
+"/"                                                     { return SYMBOL_FORWARD_SLASH; }
+"("                                                     { return SYMBOL_LT_PARENTHESES; }
+")"                                                     { return SYMBOL_RT_PARENTHESES; }
+"{"                                                     { return SYMBOL_LT_BRACKET; }
+"}"                                                     { return SYMBOL_RT_BRACKET; }
 
 ("-")?({DIGITWZ}{DIGIT}*|"0")                           { return INTEGER_NUMBER; } /* Integer numbers */
 
