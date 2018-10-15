@@ -9,15 +9,15 @@ stmt -> set id expr
 
 opt stmts -> {} | {stmt lst} | instr
 
-stmt_lst -> instr | stmt_lst instr
+stmt_lst -> instr | stmt_lst instr          // Left recursion
 
 instr -> ; |  stmt;
 
-expr -> expr + term
+expr -> expr + term                         // Left recursion
         | expr - term
         | term
 
-term -> term * factor
+term -> term * factor                       // Left recursion
         | term / factor
         | factor
 
