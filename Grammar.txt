@@ -11,7 +11,7 @@ opt stmts -> {} | {stmt lst} | instr
 
 stmt_lst -> instr | instr stmt_lst
 
-instr -> ; |  stmt;
+instr -> ; | stmt;
 
 expr -> term expr_
 expr_ -> + term expr_ | - term expr_ | epsilon

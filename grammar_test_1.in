@@ -1,5 +1,9 @@
 program MyProgram1 
 {
+}
+
+program MyProgram1 
+{
     set var1 2
     set var2 3
 

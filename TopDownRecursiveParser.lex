@@ -274,30 +274,47 @@ void skipSpaces(){
     } while(global_token_code == SYMBOL_SPACE);
 }
 
+void instr(){
+
+    
+}
+
+void stmt_lst(){
+
+    skipSpaces();
+
+    // If after a few recursive loops we finish the list of statements (stmt_lst),
+    // it's time to stop the recursion to close the optional statements (opt_stmts) 
+    // section.
+    if(global_token_code == SYMBOL_RT_BRACKET)
+        return;
+
+    instr();
+    stmt_lst();
+}
+
 void opt_stmts(){
 
     skipSpaces();
 
-    // Left parentheses
-    if(global_token_code == SYMBOL_LT_PARENTHESES){
+    // Left bracket
+    if(global_token_code == SYMBOL_LT_BRACKET){
 
-        // stmt_lst();
+        stmt_lst();
 
-        skipSpaces();
-
-        // If we saw a left parentheses, there must be a right parentheses afterwards.
-        if(global_token_code == SYMBOL_RT_PARENTHESES){
+        // If we saw a left bracket, there must be a right bracket afterwards.
+        if(global_token_code == SYMBOL_RT_BRACKET){
 
             printf("sí.\n");
         }   
         else{ 
 
-            printErrorMessage("Expected a right parentheses.");
+            printErrorMessage("Expected a right bracket.");
         }
     }
     else{
 
-        // instr();
+        instr();
     }
 }
 
@@ -312,7 +329,7 @@ void prog(){
 
         if (global_token_code == IDENTIFIER) {
 
-            // opt_stmts();
+            opt_stmts();
         }
         else{
 
