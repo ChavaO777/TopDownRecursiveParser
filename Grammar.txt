@@ -16,9 +16,8 @@ instr -> ; |  stmt;
 expr -> term expr_
 expr_ -> + term expr_ | - term expr_ | epsilon
 
-term -> term * factor                       // Left recursion
-        | term / factor
-        | factor
+term -> factor term_
+term_ -> * factor term_ | / factor term_ | epsilon
 
 factor -> (expr)
         | id
