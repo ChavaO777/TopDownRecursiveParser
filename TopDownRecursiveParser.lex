@@ -273,16 +273,119 @@ void printErrorMessage(char* errorMesssage){
     terminateProgram();
 }
 
-void skipSpaces(){
+/**
+ * Function that reads the next token while skipping spaces.
+ */ 
+void readNextToken(){
 
     do{
         global_token_code = yylex();
     } while(global_token_code == SYMBOL_SPACE);
 }
 
+void expr();
+void term();
+
+void factor(){
+
+    readNextToken();
+
+    if(global_token_code == SYMBOL_LT_PARENTHESES){
+
+        expr();
+        readNextToken();
+
+        // If we saw a left parentheses, we should see a right parentheses afterwards.
+        if(global_token_code != SYMBOL_RT_PARENTHESES){
+
+            printErrorMessage("Expected a right parentheses.");
+        }
+    } 
+    // If we didn't see a parentheses, we should've seen an identifier or 
+    // an integer number
+    else if(global_token_code != IDENTIFIER && global_token_code != INTEGER_NUMBER){
+
+        printErrorMessage("Expected a left parentheses, an identifier or a number.");
+    }
+}
+
+void term_(){
+
+    readNextToken();
+
+    if(global_token_code == SYMBOL_STAR || global_token_code == SYMBOL_FORWARD_SLASH){
+
+        factor();
+        term_();
+    }
+}
+
+void expr_(){
+
+    if(global_token_code == SYMBOL_PLUS || global_token_code == SYMBOL_MINUS){
+
+        term();
+        expr_();
+    }
+}
+
+void term(){
+
+    factor();
+    term_();
+}
+
+void expr(){
+
+    term();
+    expr_();
+}
+
+void handleSet(){
+
+    readNextToken();
+
+    if(global_token_code == IDENTIFIER){
+
+        readNextToken();
+        expr();
+    }
+    else{
+
+        printErrorMessage("Expected an identifier.");
+    }
+}
+
+void stmt(){
+
+    readNextToken();
+
+    switch(global_token_code){
+
+        case RES_WORD_SET:
+            handleSet();
+            break;
+
+        // case RES_WORD_IF:
+        //     handleIf();
+        //     break;
+
+        // case RES_WORD_IFELSE:
+        //      handleIfElse();
+        //     break;
+
+        // case RES_WORD_WHILE:
+        //     handleWhile();
+        //     break;
+
+        default:
+            printErrorMessage("Expected one of 'set', 'if', 'ifelse' and 'while'.");
+    }
+}
+
 void instr(){
 
-    skipSpaces();
+    readNextToken();
 
     if(global_token_code == SYMBOL_SEMI_COLON){
 
@@ -290,8 +393,8 @@ void instr(){
     }
     else{
 
-        // stmt();
-        skipSpaces();
+        stmt();
+        readNextToken();
 
         if(global_token_code != SYMBOL_SEMI_COLON)
             printErrorMessage("Expected a semi-colon");
@@ -300,7 +403,7 @@ void instr(){
 
 void stmt_lst(){
 
-    skipSpaces();
+    readNextToken();
 
     // If after a few recursive loops we finish the list of statements (stmt_lst),
     // it's time to stop the recursion to close the optional statements (opt_stmts) 
@@ -314,7 +417,7 @@ void stmt_lst(){
 
 void opt_stmts(){
 
-    skipSpaces();
+    readNextToken();
 
     // Left bracket
     if(global_token_code == SYMBOL_LT_BRACKET){
@@ -322,6 +425,7 @@ void opt_stmts(){
         stmt_lst();
 
         // If we saw a left bracket, there must be a right bracket afterwards.
+        // This should be the end of the program.
         if(global_token_code == SYMBOL_RT_BRACKET){
 
             printf("sí.\n");
@@ -333,7 +437,10 @@ void opt_stmts(){
     }
     else{
 
+        // If we didn't see a left bracket, we must see an instruction.
+        // This should be the end of the program.
         instr();
+        printf("sí.\n");
     }
 }
 
@@ -344,7 +451,7 @@ void prog(){
 
     if (global_token_code == RES_WORD_PROGRAM) {
 
-        skipSpaces();
+        readNextToken();
 
         if (global_token_code == IDENTIFIER) {
 
