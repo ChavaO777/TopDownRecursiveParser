@@ -13,9 +13,8 @@ stmt_lst -> instr | instr stmt_lst
 
 instr -> ; |  stmt;
 
-expr -> expr + term                         // Left recursion
-        | expr - term
-        | term
+expr -> term expr_
+expr_ -> + term expr_ | - term expr_ | epsilon
 
 term -> term * factor                       // Left recursion
         | term / factor
