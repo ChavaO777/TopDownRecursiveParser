@@ -276,16 +276,16 @@ int isPrintableCharacter(int code){
 int global_token_code = -1;
 int global_curr_parsed_line = 1;
 
-void terminateProgram(){
+void terminateProgram(int exitCode){
 
-    exit(0);
+    exit(exitCode);
 }
 
 void printErrorMessage(int errorCode, char* currFunction, char* errorMesssage){
 
     printf("Error #%d at input line %d, function '%s': %s\n", errorCode, global_curr_parsed_line, currFunction, errorMesssage);
     printf("no\n");
-    terminateProgram();
+    terminateProgram(1);
 }
 
 void printLastToken(char *readAtFunctionName){
@@ -623,10 +623,7 @@ void prog(){
     }
 }
 
-/**
- * Main function of the program.
- */ 
-int main(int argc, char **argv){
+void handleInput(int argc, char **argv){
 
     if(argc > 1){
 
@@ -637,11 +634,16 @@ int main(int argc, char **argv){
 
         yyin = stdin;
     }
+}
 
+/**
+ * Main function of the program.
+ */ 
+int main(int argc, char **argv){
+
+    handleInput(argc, argv);
     prog();
-
     printf("sí.\n");
-    terminateProgram();
 
     return 0;
 }
