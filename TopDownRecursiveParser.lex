@@ -354,14 +354,8 @@ void factor(){
 
 void term_(){
 
-    readNextToken();
-    printLastToken("term_");
-
-    if(global_token_code == SYMBOL_STAR || global_token_code == SYMBOL_FORWARD_SLASH){
-
-        factor();
-        term_();
-    }
+    factor();
+    term_();
 }
 
 void expr_(){
@@ -378,13 +372,29 @@ void expr_(){
 void term(){
 
     factor();
-    term_();
+    readNextToken();
+
+    if(global_token_code == SYMBOL_STAR || global_token_code == SYMBOL_FORWARD_SLASH){
+
+        term_();
+    }
+    else if(global_token_code == SYMBOL_SEMI_COLON){
+
+        return;
+    }
 }
 
 void expr(){
 
     term();
-    expr_();
+
+    if(global_token_code == SYMBOL_SEMI_COLON){
+
+        return;
+    }else{
+
+        expr_();
+    }
 }
 
 void handleSet(){
@@ -452,7 +462,6 @@ void instr(void caller()){
     else{
 
         stmt(caller);
-        readNextToken();
         printLastToken("instr");
 
         if(global_token_code != SYMBOL_SEMI_COLON)
