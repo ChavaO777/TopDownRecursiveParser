@@ -1,7 +1,4 @@
 program MyProgram1 
 {
-    set var1 2
-    set var2 3
-
-    if ( var1 < var2 ) set var2 var1
+    set var1 2;
 }

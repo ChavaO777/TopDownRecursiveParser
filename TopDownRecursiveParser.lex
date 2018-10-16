@@ -269,7 +269,7 @@ int isPrintableCharacter(int code){
     return code >= 0;
 }
 
-// ################# SYNTAX ANALIZER #################
+// ################# SYNTAX ANALYZER #################
 
 // Global variable to store the code of each token to be read.
 int global_token_code = -1;
@@ -282,14 +282,14 @@ void terminateProgram(){
 
 void printErrorMessage(int errorCode, char* currFunction, char* errorMesssage){
 
-    printf("Error %d at input line %d, function '%s': %s\n", errorCode, global_curr_parsed_line, currFunction, errorMesssage);
+    printf("Error #%d at input line %d, function '%s': %s\n", errorCode, global_curr_parsed_line, currFunction, errorMesssage);
     printf("no\n");
     terminateProgram();
 }
 
 void printLastToken(char *readAtFunctionName){
 
-    printf("Read at function '%s'; currToken = %s; at line = %d, global_token_code = %d\n", readAtFunctionName, yytext, global_curr_parsed_line, global_token_code);
+    printf("Read at function '%s'; currToken = '%s'; at line = %d; global_token_code = %d\n", readAtFunctionName, yytext, global_curr_parsed_line, global_token_code);
 }
 
 int isPrintableToken(int tokenCode){
@@ -303,7 +303,13 @@ int isPrintableToken(int tokenCode){
 void readNextToken(){
 
     do{
+        if(isPrintableToken(global_token_code))
+            printf("1 token = %s\n", yytext);
+
         global_token_code = yylex();
+
+        if(isPrintableToken(global_token_code))
+            printf("2 token = %s\n", yytext);
 
         if(global_token_code == NEW_LINE)
             global_curr_parsed_line++;
@@ -316,11 +322,12 @@ void readNextToken(){
 void expr();
 void term();
 void stmt_lst();
+void opt_stmts();
 
 void factor(){
 
     readNextToken();
-    // printLastToken("factor");
+    printLastToken("factor");
 
     if(global_token_code == SYMBOL_LT_PARENTHESES){
 
@@ -335,7 +342,11 @@ void factor(){
     } 
     // If we didn't see a parentheses, we should've seen an identifier or 
     // an integer number
-    else if(global_token_code != IDENTIFIER && global_token_code != INTEGER_NUMBER){
+    else if(global_token_code == IDENTIFIER || global_token_code == INTEGER_NUMBER){
+
+        return;
+    }
+    else{
 
         printErrorMessage(ERR_CODE_LT_PARENTHESES_IDENTIFIER_NUMBER, "factor", "Expected a left parentheses, an identifier or a number.");
     }
@@ -344,6 +355,7 @@ void factor(){
 void term_(){
 
     readNextToken();
+    printLastToken("term_");
 
     if(global_token_code == SYMBOL_STAR || global_token_code == SYMBOL_FORWARD_SLASH){
 
@@ -378,10 +390,10 @@ void expr(){
 void handleSet(){
 
     readNextToken();
+    printLastToken("handleSet");
 
     if(global_token_code == IDENTIFIER){
 
-        readNextToken();
         expr();
     }
     else{
@@ -398,7 +410,6 @@ void stmt(void caller()){
 
         readNextToken();
         printLastToken("stmt");
-
     }
 
     switch(global_token_code){
@@ -426,9 +437,10 @@ void stmt(void caller()){
 
 void instr(void caller()){
 
-    // If you came from 'stmt_lst', DO NOT read a token here.
-    // The token was read in that caller function.
-    if(caller != stmt_lst){
+    // If you came from 'stmt_lst' or 'opt_stmts', 
+    // DO NOT read a token here. The token was read 
+    // in that caller function.
+    if(caller != stmt_lst && caller != opt_stmts){
 
         readNextToken();
     }
@@ -441,6 +453,7 @@ void instr(void caller()){
 
         stmt(caller);
         readNextToken();
+        printLastToken("instr");
 
         if(global_token_code != SYMBOL_SEMI_COLON)
             printErrorMessage(ERR_CODE_SEMI_COLON, "instr", "Expected a semi-colon");
@@ -450,7 +463,7 @@ void instr(void caller()){
 void stmt_lst(){
 
     readNextToken();
-    // printLastToken("stmt_lst");
+    printLastToken("stmt_lst");
 
     // If after a few recursive loops we finish the list of statements (stmt_lst),
     // it's time to stop the recursion to close the optional statements (opt_stmts) 
@@ -494,7 +507,7 @@ void opt_stmts(){
 void prog(){
 
     // Read the next token
-    global_token_code = yylex();
+    readNextToken();
 
     if (global_token_code == RES_WORD_PROGRAM) {
 
@@ -518,7 +531,17 @@ void prog(){
 /**
  * Main function of the program.
  */ 
-int main(){
+int main(int argc, char **argv){
+
+    if(argc > 1){
+
+        // Open the input file
+        yyin = fopen(argv[1], "r");
+    }
+    else{
+
+        yyin = stdin;
+    }
 
     prog();
 
