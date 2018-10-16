@@ -362,8 +362,6 @@ void term_(){
 
 void expr_(){
 
-    readNextToken();
-
     if(global_token_code == SYMBOL_PLUS || global_token_code == SYMBOL_MINUS){
 
         term();
@@ -478,6 +476,30 @@ void handleIfElse(){
     }
 }
 
+void handleWhile(){
+
+    readNextToken();
+
+    if(global_token_code == SYMBOL_LT_PARENTHESES){
+
+        expression();
+
+        // If we saw a left parentheses, we should see a right parentheses afterwards.
+        if(global_token_code == SYMBOL_RT_PARENTHESES){
+
+            opt_stmts();
+        }
+        else{
+
+            printErrorMessage(ERR_CODE_RT_PARENTHESES, "handleIf", "Expected a right parentheses.");
+        }
+    }
+    else{
+
+        printErrorMessage(ERR_CODE_LT_PARENTHESES, "handleIf", "Expected a left parentheses.");
+    }
+}
+
 void stmt(void caller()){
 
     // If you came from 'instr', DO NOT read a token here.
@@ -502,9 +524,9 @@ void stmt(void caller()){
             handleIfElse();
             break;
 
-        // case RES_WORD_WHILE:
-        //     handleWhile();
-        //     break;
+        case RES_WORD_WHILE:
+            handleWhile();
+            break;
 
         default:
             printErrorMessage(ERR_CODE_SET_IF_IFELSE_WHILE, "stmt", "Expected one of 'set', 'if', 'ifelse' and 'while'.");
