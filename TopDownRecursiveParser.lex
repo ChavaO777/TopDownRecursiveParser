@@ -453,6 +453,31 @@ void handleIf(){
     }
 }
 
+void handleIfElse(){
+
+    readNextToken();
+
+    if(global_token_code == SYMBOL_LT_PARENTHESES){
+
+        expression();
+
+        // If we saw a left parentheses, we should see a right parentheses afterwards.
+        if(global_token_code == SYMBOL_RT_PARENTHESES){
+
+            opt_stmts();
+            opt_stmts();
+        }
+        else{
+
+            printErrorMessage(ERR_CODE_RT_PARENTHESES, "handleIf", "Expected a right parentheses.");
+        }
+    }
+    else{
+
+        printErrorMessage(ERR_CODE_LT_PARENTHESES, "handleIf", "Expected a left parentheses.");
+    }
+}
+
 void stmt(void caller()){
 
     // If you came from 'instr', DO NOT read a token here.
@@ -473,9 +498,9 @@ void stmt(void caller()){
             handleIf();
             break;
 
-        // case RES_WORD_IFELSE:
-        //      handleIfElse();
-        //     break;
+        case RES_WORD_IFELSE:
+            handleIfElse();
+            break;
 
         // case RES_WORD_WHILE:
         //     handleWhile();
@@ -535,11 +560,9 @@ void opt_stmts(){
         stmt_lst();
 
         // If we saw a left bracket, there must be a right bracket afterwards.
-        // This should be the end of the program.
         if(global_token_code == SYMBOL_RT_BRACKET){
 
-            printf("sí.\n");
-            terminateProgram();
+            return;
         }   
         else{ 
 
@@ -549,10 +572,8 @@ void opt_stmts(){
     else{
 
         // If we didn't see a left bracket, we must see an instruction.
-        // This should be the end of the program.
         instr(opt_stmts);
-        printf("sí.\n");
-        terminateProgram();
+        return;
     }
 }
 
@@ -596,6 +617,9 @@ int main(int argc, char **argv){
     }
 
     prog();
+
+    printf("sí.\n");
+    terminateProgram();
 
     // // Variable to store the code of each token to be read.
     // int code = -1;
