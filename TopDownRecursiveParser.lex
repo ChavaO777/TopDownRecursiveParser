@@ -643,30 +643,5 @@ int main(int argc, char **argv){
     printf("sí.\n");
     terminateProgram();
 
-    // // Variable to store the code of each token to be read.
-    // int code = -1;
-    
-    // while(1){
-        
-    //     code = yylex();
-
-    //     // If this is the end of the file, stop here.
-    //     if(code == END_OF_FILE)
-    //         break;
-
-    //     switch(isPrintableCharacter(code)){
-
-    //         case 0:
-    //             handleNonPrintableTokens(code);
-    //             break;
-
-    //         case 1:
-    //             handlePrintableTokens(code);
-    //             break;
-    //     }
-    // }
-
-    // printf("\n");
-
     return 0;
 }
