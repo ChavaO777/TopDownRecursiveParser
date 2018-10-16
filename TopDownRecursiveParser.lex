@@ -143,6 +143,7 @@ ifelse                                                  { return RES_WORD_IFELSE
 #define ERR_CODE_SEMI_COLON                             4
 #define ERR_CODE_RT_BRACKET                             5
 #define ERR_CODE_PROGRAM                                6
+#define ERR_CODE_LT_PARENTHESES                         7
 
 /**
  * Function that handles the printing of codes for reserved words.
@@ -323,6 +324,7 @@ void expr();
 void term();
 void stmt_lst();
 void opt_stmts();
+void instr(void caller());
 
 void factor(){
 
@@ -391,10 +393,25 @@ void expr(){
     if(global_token_code == SYMBOL_SEMI_COLON){
 
         return;
-    }else{
+    }
+    // For parsing expressions inside statements
+    else if(global_token_code == SYMBOL_LT 
+        || global_token_code == SYMBOL_EQ
+        || global_token_code == SYMBOL_GT
+        || global_token_code == SYMBOL_RT_PARENTHESES){
+
+        return;
+    }
+    else{
 
         expr_();
     }
+}
+
+void expression(){
+
+    expr();
+    expr();
 }
 
 void handleSet(){
@@ -412,11 +429,35 @@ void handleSet(){
     }
 }
 
+void handleIf(){
+
+    readNextToken();
+
+    if(global_token_code == SYMBOL_LT_PARENTHESES){
+
+        expression();
+
+        // If we saw a left parentheses, we should see a right parentheses afterwards.
+        if(global_token_code == SYMBOL_RT_PARENTHESES){
+
+            opt_stmts();
+        }
+        else{
+
+            printErrorMessage(ERR_CODE_RT_PARENTHESES, "handleIf", "Expected a right parentheses.");
+        }
+    }
+    else{
+
+        printErrorMessage(ERR_CODE_LT_PARENTHESES, "handleIf", "Expected a left parentheses.");
+    }
+}
+
 void stmt(void caller()){
 
     // If you came from 'instr', DO NOT read a token here.
     // The token was read in that caller function.
-    if(caller != stmt_lst){
+    if(caller != stmt_lst && caller != instr){
 
         readNextToken();
         printLastToken("stmt");
@@ -428,9 +469,9 @@ void stmt(void caller()){
             handleSet();
             break;
 
-        // case RES_WORD_IF:
-        //     handleIf();
-        //     break;
+        case RES_WORD_IF:
+            handleIf();
+            break;
 
         // case RES_WORD_IFELSE:
         //      handleIfElse();
@@ -461,7 +502,7 @@ void instr(void caller()){
     }
     else{
 
-        stmt(caller);
+        stmt(instr);
         printLastToken("instr");
 
         if(global_token_code != SYMBOL_SEMI_COLON)
@@ -498,6 +539,7 @@ void opt_stmts(){
         if(global_token_code == SYMBOL_RT_BRACKET){
 
             printf("sí.\n");
+            terminateProgram();
         }   
         else{ 
 
@@ -510,6 +552,7 @@ void opt_stmts(){
         // This should be the end of the program.
         instr(opt_stmts);
         printf("sí.\n");
+        terminateProgram();
     }
 }
 

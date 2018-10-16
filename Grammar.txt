@@ -3,7 +3,7 @@ Grammar:
 prog -> program id opt_stmts
 
 stmt -> set id expr
-        | if (expresion) opt stmts
+        | if (expresion) opt_stmts
         | ifelse (expresion) opt_stmts opt_stmts
         | while (expresion) opt_stmts
 
