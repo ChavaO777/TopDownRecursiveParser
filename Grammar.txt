@@ -9,7 +9,6 @@ stmt -> set id expr
 
 opt_stmts -> {stmt_lst} | instr
 
-stmt_lst -> instr | instr stmt_lst | epsilon
 stmt_lst -> instr stmt_lst | epsilon
 
 instr -> ; | stmt;
@@ -24,9 +23,5 @@ factor -> (expr)
         | id
         | num
 
-expresion -> expr < expr
-        | expr > expr
-        | expr = expr
-
-expression -> expr X
-X -> < expr | > expr | = expr
+expression -> expr auxExpression
+auxExpression -> < expr | > expr | = expr
