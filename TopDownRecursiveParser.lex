@@ -132,6 +132,66 @@ ifelse                                                  { return RES_WORD_IFELSE
 .                                                       { return 1100; } /* Anything else */
 %%
 
+// ################# DATA STRUCTURES #################
+
+struct node{
+
+    int data;
+    struct node* next;
+};
+
+void init(struct node* head){
+
+    head = NULL;
+}
+
+struct node* push(struct node* head, int data){
+
+    struct node* tmp = (struct node*) malloc(sizeof(struct node));
+
+    if(tmp == NULL) {
+
+        printf("Error while requesting memory for a new node!\n");
+        exit(0);
+    }
+
+    tmp->data = data;
+    tmp->next = head;
+    head = tmp;
+    return head;
+}
+
+struct node* pop(struct node *head, int *ptrTopTokenCode){
+
+    struct node* tmp = head;
+    *ptrTopTokenCode = head->data;
+    head = head->next;
+    free(tmp);
+    return head;
+}   
+
+void printStack(struct node* head){
+
+    struct node* current;
+    current = head;
+
+    if(current != NULL){
+
+        do{
+
+            printf("%d ", current->data);
+            current = current->next;
+
+        }while(current != NULL);
+
+        printf("\n");
+    }
+    else{
+
+        printf("The stack is empty.\n");
+    }
+}
+
 // ################# LEXICAL ANALIZER #################
 
 // Error codes
@@ -342,11 +402,18 @@ void factor(){
             printErrorMessage(ERR_CODE_RT_PARENTHESES, "factor", "Expected a right parentheses.");
         }
     } 
-    // If we didn't see a parentheses, we should've seen an identifier or 
-    // an integer number
+    // If we didn't see a left parentheses, we should've seen an identifier, 
+    // an integer number or a right parentheses.
     else if(global_token_code == IDENTIFIER || global_token_code == INTEGER_NUMBER){
 
-        return;
+        readNextToken();
+        
+        if(global_token_code == SYMBOL_RT_PARENTHESES){
+            
+            return;
+        }
+
+        // return;
     }
     else{
 
