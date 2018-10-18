@@ -59,6 +59,7 @@
 #define SYMBOL_RT_BRACKET       117
 #define SYMBOL_SPACE            -118
 #define NEW_LINE                -119
+#define SYMBOL_DOLLAR_SIGN      120
 
 /* Integer numbers */
 #define INTEGER_NUMBER          200
@@ -140,12 +141,9 @@ struct node{
     struct node* next;
 };
 
-void init(struct node* head){
+struct node* global_stack_head = NULL;
 
-    head = NULL;
-}
-
-struct node* push(struct node* head, int data){
+void push(int data){
 
     struct node* tmp = (struct node*) malloc(sizeof(struct node));
 
@@ -156,24 +154,22 @@ struct node* push(struct node* head, int data){
     }
 
     tmp->data = data;
-    tmp->next = head;
-    head = tmp;
-    return head;
+    tmp->next = global_stack_head;
+    global_stack_head = tmp;
 }
 
-struct node* pop(struct node *head, int *ptrTopTokenCode){
+void pop(int *ptrTopTokenCode){
 
-    struct node* tmp = head;
-    *ptrTopTokenCode = head->data;
-    head = head->next;
+    struct node* tmp = global_stack_head;
+    *ptrTopTokenCode = global_stack_head->data;
+    global_stack_head = global_stack_head->next;
     free(tmp);
-    return head;
 }   
 
-void printStack(struct node* head){
+void printStack(){
 
     struct node* current;
-    current = head;
+    current = global_stack_head;
 
     if(current != NULL){
 
@@ -708,7 +704,32 @@ void handleInput(int argc, char **argv){
  */ 
 int main(int argc, char **argv){
 
+    push(SYMBOL_DOLLAR_SIGN);
+
+    /**
+     * Pseudocode:
+     * 
+     * While the stack is not empty, compare the top of the stack 
+     * and the last read token.
+     * 
+     * Case 1: they're equal
+     *      - pop that element from the stack
+     *      - read the next input token
+     * 
+     * Case 2: there is a rule that links them
+     *      - Swap the stack top for the right side of the rule. 
+     *        Push that rule right side in reverse order to match
+     *        the stack's FIFO behavior.
+     * 
+     * If the input is finished and the stack
+     * Exit states:
+     * 
+     * 1. Consumed input and stack with the $ (dollar sign) at the top: success via empty stack.
+     * 2. If the parser cannot perform a valid transition, the input is rejected.
+     */ 
+
     handleInput(argc, argv);
+    
     prog();
     printf("sí.\n");
 
