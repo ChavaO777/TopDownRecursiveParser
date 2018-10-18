@@ -59,7 +59,6 @@
 #define SYMBOL_RT_BRACKET       117
 #define SYMBOL_SPACE            -118
 #define NEW_LINE                -119
-#define SYMBOL_DOLLAR_SIGN      120
 
 /* Integer numbers */
 #define INTEGER_NUMBER          200
@@ -164,7 +163,12 @@ void pop(int *ptrTopTokenCode){
     *ptrTopTokenCode = global_stack_head->data;
     global_stack_head = global_stack_head->next;
     free(tmp);
-}   
+} 
+
+int top(){
+
+    return global_stack_head->data;
+}  
 
 void printStack(){
 
@@ -187,6 +191,25 @@ void printStack(){
         printf("The stack is empty.\n");
     }
 }
+
+// Symbols for the stack
+// Non-terminals
+#define SYMBOL_DOLLAR_SIGN                      1000
+#define NON_TERMINAL_PROG                       1001
+#define NON_TERMINAL_OPT_STMTS                  1002
+#define NON_TERMINAL_STMT                       1003
+#define NON_TERMINAL_EXPRESION                  1004
+#define NON_TERMINAL_STMT_LST                   1005
+#define NON_TERMINAL_INSTR                      1006
+#define NON_TERMINAL_EXPR                       1007
+#define NON_TERMINAL_TERM                       1008
+#define NON_TERMINAL_EXPR_                      1009
+#define NON_TERMINAL_FACTOR                     1010
+#define NON_TERMINAL_TERM_                      1011
+#define NON_TERMINAL_EXPRESION_                 1012
+
+// Terminals
+#define TERMINAL_PROGRAM                        2001
 
 // ################# LEXICAL ANALIZER #################
 
@@ -376,296 +399,299 @@ void readNextToken(){
     // printLastToken("");
 }
 
-void expr();
-void term();
-void stmt_lst();
-void opt_stmts();
-void instr(void caller());
+// void expr();
+// void term();
+// void stmt_lst();
+// void opt_stmts();
+// void instr(void caller());
 
-void factor(){
+// void factor(){
 
-    readNextToken();
-    printLastToken("factor");
+//     readNextToken();
+//     printLastToken("factor");
 
-    if(global_token_code == SYMBOL_LT_PARENTHESES){
+//     if(global_token_code == SYMBOL_LT_PARENTHESES){
 
-        expr();
-        readNextToken();
+//         expr();
+//         readNextToken();
 
-        // If we saw a left parentheses, we should see a right parentheses afterwards.
-        if(global_token_code != SYMBOL_RT_PARENTHESES){
+//         // If we saw a left parentheses, we should see a right parentheses afterwards.
+//         if(global_token_code != SYMBOL_RT_PARENTHESES){
 
-            printErrorMessage(ERR_CODE_RT_PARENTHESES, "factor", "Expected a right parentheses.");
-        }
-    } 
-    // If we didn't see a left parentheses, we should've seen an identifier, 
-    // an integer number or a right parentheses.
-    else if(global_token_code == IDENTIFIER || global_token_code == INTEGER_NUMBER){
+//             printErrorMessage(ERR_CODE_RT_PARENTHESES, "factor", "Expected a right parentheses.");
+//         }
+//     } 
+//     // If we didn't see a left parentheses, we should've seen an identifier, 
+//     // an integer number or a right parentheses.
+//     else if(global_token_code == IDENTIFIER || global_token_code == INTEGER_NUMBER){
 
-        readNextToken();
+//         readNextToken();
         
-        if(global_token_code == SYMBOL_RT_PARENTHESES){
+//         if(global_token_code == SYMBOL_RT_PARENTHESES){
             
-            return;
-        }
+//             return;
+//         }
 
-        // return;
-    }
-    else{
+//         // return;
+//     }
+//     else{
 
-        printErrorMessage(ERR_CODE_LT_PARENTHESES_IDENTIFIER_NUMBER, "factor", "Expected a left parentheses, an identifier or a number.");
-    }
-}
+//         printErrorMessage(ERR_CODE_LT_PARENTHESES_IDENTIFIER_NUMBER, "factor", "Expected a left parentheses, an identifier or a number.");
+//     }
+// }
 
-void term_(){
+// void term_(){
 
-    factor();
-    term_();
-}
+//     factor();
+//     term_();
+// }
 
-void expr_(){
+// void expr_(){
 
-    if(global_token_code == SYMBOL_PLUS || global_token_code == SYMBOL_MINUS){
+//     if(global_token_code == SYMBOL_PLUS || global_token_code == SYMBOL_MINUS){
 
-        term();
-        expr_();
-    }
-}
+//         term();
+//         expr_();
+//     }
+// }
 
-void term(){
+// void term(){
 
-    factor();
-    readNextToken();
+//     factor();
+//     readNextToken();
 
-    if(global_token_code == SYMBOL_STAR || global_token_code == SYMBOL_FORWARD_SLASH){
+//     if(global_token_code == SYMBOL_STAR || global_token_code == SYMBOL_FORWARD_SLASH){
 
-        term_();
-    }
-    else if(global_token_code == SYMBOL_SEMI_COLON){
+//         term_();
+//     }
+//     else if(global_token_code == SYMBOL_SEMI_COLON){
 
-        return;
-    }
-}
+//         return;
+//     }
+// }
 
-void expr(){
+// void expr(){
 
-    term();
+//     term();
 
-    if(global_token_code == SYMBOL_SEMI_COLON){
+//     if(global_token_code == SYMBOL_SEMI_COLON){
 
-        return;
-    }
-    // For parsing expressions inside statements
-    else if(global_token_code == SYMBOL_LT 
-        || global_token_code == SYMBOL_EQ
-        || global_token_code == SYMBOL_GT
-        || global_token_code == SYMBOL_RT_PARENTHESES){
+//         return;
+//     }
+//     // For parsing expressions inside statements
+//     else if(global_token_code == SYMBOL_LT 
+//         || global_token_code == SYMBOL_EQ
+//         || global_token_code == SYMBOL_GT
+//         || global_token_code == SYMBOL_RT_PARENTHESES){
 
-        return;
-    }
-    else{
+//         return;
+//     }
+//     else{
 
-        expr_();
-    }
-}
+//         expr_();
+//     }
+// }
 
-void expression(){
+// void expression(){
 
-    expr();
-    expr();
-}
+//     expr();
+//     expr();
+// }
 
-void handleSet(){
+// void handleSet(){
 
-    readNextToken();
-    printLastToken("handleSet");
+//     readNextToken();
+//     printLastToken("handleSet");
 
-    if(global_token_code == IDENTIFIER){
+//     if(global_token_code == IDENTIFIER){
 
-        expr();
-    }
-    else{
+//         expr();
+//     }
+//     else{
 
-        printErrorMessage(ERR_CODE_IDENTIFIER, "handleSet", "Expected an identifier.");
-    }
-}
+//         printErrorMessage(ERR_CODE_IDENTIFIER, "handleSet", "Expected an identifier.");
+//     }
+// }
 
-void handleIf(){
+// void handleIf(){
 
-    readNextToken();
+//     readNextToken();
 
-    if(global_token_code == SYMBOL_LT_PARENTHESES){
+//     if(global_token_code == SYMBOL_LT_PARENTHESES){
 
-        expression();
+//         expression();
 
-        // If we saw a left parentheses, we should see a right parentheses afterwards.
-        if(global_token_code == SYMBOL_RT_PARENTHESES){
+//         // If we saw a left parentheses, we should see a right parentheses afterwards.
+//         if(global_token_code == SYMBOL_RT_PARENTHESES){
 
-            opt_stmts();
-        }
-        else{
+//             opt_stmts();
+//         }
+//         else{
 
-            printErrorMessage(ERR_CODE_RT_PARENTHESES, "handleIf", "Expected a right parentheses.");
-        }
-    }
-    else{
+//             printErrorMessage(ERR_CODE_RT_PARENTHESES, "handleIf", "Expected a right parentheses.");
+//         }
+//     }
+//     else{
 
-        printErrorMessage(ERR_CODE_LT_PARENTHESES, "handleIf", "Expected a left parentheses.");
-    }
-}
+//         printErrorMessage(ERR_CODE_LT_PARENTHESES, "handleIf", "Expected a left parentheses.");
+//     }
+// }
 
-void handleIfElse(){
+// void handleIfElse(){
 
-    readNextToken();
+//     readNextToken();
 
-    if(global_token_code == SYMBOL_LT_PARENTHESES){
+//     if(global_token_code == SYMBOL_LT_PARENTHESES){
 
-        expression();
+//         expression();
 
-        // If we saw a left parentheses, we should see a right parentheses afterwards.
-        if(global_token_code == SYMBOL_RT_PARENTHESES){
+//         // If we saw a left parentheses, we should see a right parentheses afterwards.
+//         if(global_token_code == SYMBOL_RT_PARENTHESES){
 
-            opt_stmts();
-            opt_stmts();
-        }
-        else{
+//             opt_stmts();
+//             opt_stmts();
+//         }
+//         else{
 
-            printErrorMessage(ERR_CODE_RT_PARENTHESES, "handleIf", "Expected a right parentheses.");
-        }
-    }
-    else{
+//             printErrorMessage(ERR_CODE_RT_PARENTHESES, "handleIf", "Expected a right parentheses.");
+//         }
+//     }
+//     else{
 
-        printErrorMessage(ERR_CODE_LT_PARENTHESES, "handleIf", "Expected a left parentheses.");
-    }
-}
+//         printErrorMessage(ERR_CODE_LT_PARENTHESES, "handleIf", "Expected a left parentheses.");
+//     }
+// }
 
-void handleWhile(){
+// void handleWhile(){
 
-    readNextToken();
+//     readNextToken();
 
-    if(global_token_code == SYMBOL_LT_PARENTHESES){
+//     if(global_token_code == SYMBOL_LT_PARENTHESES){
 
-        expression();
+//         expression();
 
-        // If we saw a left parentheses, we should see a right parentheses afterwards.
-        if(global_token_code == SYMBOL_RT_PARENTHESES){
+//         // If we saw a left parentheses, we should see a right parentheses afterwards.
+//         if(global_token_code == SYMBOL_RT_PARENTHESES){
 
-            opt_stmts();
-        }
-        else{
+//             opt_stmts();
+//         }
+//         else{
 
-            printErrorMessage(ERR_CODE_RT_PARENTHESES, "handleIf", "Expected a right parentheses.");
-        }
-    }
-    else{
+//             printErrorMessage(ERR_CODE_RT_PARENTHESES, "handleIf", "Expected a right parentheses.");
+//         }
+//     }
+//     else{
 
-        printErrorMessage(ERR_CODE_LT_PARENTHESES, "handleIf", "Expected a left parentheses.");
-    }
-}
+//         printErrorMessage(ERR_CODE_LT_PARENTHESES, "handleIf", "Expected a left parentheses.");
+//     }
+// }
 
-void stmt(void caller()){
+// void stmt(void caller()){
 
-    // If you came from 'instr', DO NOT read a token here.
-    // The token was read in that caller function.
-    if(caller != stmt_lst && caller != instr){
+//     // If you came from 'instr', DO NOT read a token here.
+//     // The token was read in that caller function.
+//     if(caller != stmt_lst && caller != instr){
 
-        readNextToken();
-        printLastToken("stmt");
-    }
+//         readNextToken();
+//         printLastToken("stmt");
+//     }
 
-    switch(global_token_code){
+//     switch(global_token_code){
 
-        case RES_WORD_SET:
-            handleSet();
-            break;
+//         case RES_WORD_SET:
+//             handleSet();
+//             break;
 
-        case RES_WORD_IF:
-            handleIf();
-            break;
+//         case RES_WORD_IF:
+//             handleIf();
+//             break;
 
-        case RES_WORD_IFELSE:
-            handleIfElse();
-            break;
+//         case RES_WORD_IFELSE:
+//             handleIfElse();
+//             break;
 
-        case RES_WORD_WHILE:
-            handleWhile();
-            break;
+//         case RES_WORD_WHILE:
+//             handleWhile();
+//             break;
 
-        default:
-            printErrorMessage(ERR_CODE_SET_IF_IFELSE_WHILE, "stmt", "Expected one of 'set', 'if', 'ifelse' and 'while'.");
-    }
-}
+//         default:
+//             printErrorMessage(ERR_CODE_SET_IF_IFELSE_WHILE, "stmt", "Expected one of 'set', 'if', 'ifelse' and 'while'.");
+//     }
+// }
 
-void instr(void caller()){
+// void instr(void caller()){
 
-    // If you came from 'stmt_lst' or 'opt_stmts', 
-    // DO NOT read a token here. The token was read 
-    // in that caller function.
-    if(caller != stmt_lst && caller != opt_stmts){
+//     // If you came from 'stmt_lst' or 'opt_stmts', 
+//     // DO NOT read a token here. The token was read 
+//     // in that caller function.
+//     if(caller != stmt_lst && caller != opt_stmts){
 
-        readNextToken();
-    }
+//         readNextToken();
+//     }
 
-    if(global_token_code == SYMBOL_SEMI_COLON){
+//     if(global_token_code == SYMBOL_SEMI_COLON){
 
-        return;
-    }
-    else{
+//         return;
+//     }
+//     else{
 
-        stmt(instr);
-        printLastToken("instr");
+//         stmt(instr);
+//         printLastToken("instr");
 
-        if(global_token_code != SYMBOL_SEMI_COLON)
-            printErrorMessage(ERR_CODE_SEMI_COLON, "instr", "Expected a semi-colon");
-    }
-}
+//         if(global_token_code != SYMBOL_SEMI_COLON)
+//             printErrorMessage(ERR_CODE_SEMI_COLON, "instr", "Expected a semi-colon");
+//     }
+// }
 
-void stmt_lst(){
+// void stmt_lst(){
 
-    readNextToken();
-    printLastToken("stmt_lst");
+//     readNextToken();
+//     printLastToken("stmt_lst");
 
-    // If after a few recursive loops we finish the list of statements (stmt_lst),
-    // it's time to stop the recursion to close the optional statements (opt_stmts) 
-    // section.
-    if(global_token_code == SYMBOL_RT_BRACKET)
-        return;
+//     // If after a few recursive loops we finish the list of statements (stmt_lst),
+//     // it's time to stop the recursion to close the optional statements (opt_stmts) 
+//     // section.
+//     if(global_token_code == SYMBOL_RT_BRACKET)
+//         return;
 
-    instr(stmt_lst);
-    stmt_lst();
-}
+//     instr(stmt_lst);
+//     stmt_lst();
+// }
 
-void opt_stmts(){
+// void opt_stmts(){
 
-    readNextToken();
+//     readNextToken();
 
-    // Left bracket
-    if(global_token_code == SYMBOL_LT_BRACKET){
+//     // Left bracket
+//     if(global_token_code == SYMBOL_LT_BRACKET){
 
-        stmt_lst();
+//         stmt_lst();
 
-        // If we saw a left bracket, there must be a right bracket afterwards.
-        if(global_token_code == SYMBOL_RT_BRACKET){
+//         // If we saw a left bracket, there must be a right bracket afterwards.
+//         if(global_token_code == SYMBOL_RT_BRACKET){
 
-            return;
-        }   
-        else{ 
+//             return;
+//         }   
+//         else{ 
 
-            printErrorMessage(ERR_CODE_RT_BRACKET, "opt_stmts", "Expected a right bracket.");
-        }
-    }
-    else{
+//             printErrorMessage(ERR_CODE_RT_BRACKET, "opt_stmts", "Expected a right bracket.");
+//         }
+//     }
+//     else{
 
-        // If we didn't see a left bracket, we must see an instruction.
-        instr(opt_stmts);
-        return;
-    }
-}
+//         // If we didn't see a left bracket, we must see an instruction.
+//         instr(opt_stmts);
+//         return;
+//     }
+// }
 
 void prog(){
 
     // Read the next token
     readNextToken();
+
+    // Compare the stack's top and the current token:
+    if(top() )    
 
     if (global_token_code == RES_WORD_PROGRAM) {
 
@@ -673,7 +699,7 @@ void prog(){
 
         if (global_token_code == IDENTIFIER) {
 
-            opt_stmts();
+            // opt_stmts();
         }
         else{
 
@@ -704,7 +730,6 @@ void handleInput(int argc, char **argv){
  */ 
 int main(int argc, char **argv){
 
-    push(SYMBOL_DOLLAR_SIGN);
 
     /**
      * Pseudocode:
@@ -729,7 +754,14 @@ int main(int argc, char **argv){
      */ 
 
     handleInput(argc, argv);
+
+    // Push the end-of-input symbol to the stack
+    push(SYMBOL_DOLLAR_SIGN);
     
+    // Push the initial grammar symbol "prog" to the stack
+    push(NON_TERMINAL_PROG);
+    
+    // Call the initial function
     prog();
     printf("sí.\n");
 
