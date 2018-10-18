@@ -7,9 +7,10 @@ stmt -> set id expr
         | ifelse (expresion) opt_stmts opt_stmts
         | while (expresion) opt_stmts
 
-opt_stmts -> {} | {stmt_lst} | instr
+opt_stmts -> {stmt_lst} | instr
 
-stmt_lst -> instr | instr stmt_lst
+stmt_lst -> instr | instr stmt_lst | epsilon
+stmt_lst -> instr stmt_lst | epsilon
 
 instr -> ; | stmt;
 
@@ -26,3 +27,6 @@ factor -> (expr)
 expresion -> expr < expr
         | expr > expr
         | expr = expr
+
+expression -> expr X
+X -> < expr | > expr | = expr

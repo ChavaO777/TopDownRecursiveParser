@@ -10,12 +10,12 @@
             "request": "launch",
             "program": "${workspaceFolder}/a.out",
             "args": [
-                "grammar_test_1.in"
+                "test/test_positive_set_product.in"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": true,
+            "externalConsole": false,
             "MIMode": "lldb"
         }
     ]
