@@ -23,5 +23,5 @@ factor -> (expr)
         | id
         | num
 
-expression -> expr auxExpression
-auxExpression -> < expr | > expr | = expr
+expresion -> expr expresion_
+expresion_ -> < expr | > expr | = expr
