@@ -230,6 +230,7 @@ void printStack(){
 #define ERR_MESSAGE_SET_IF_IFELSE_WHILE_SEMI_COLON      "Expected the token 'set', 'if', 'ifelse', 'while' or ';'."
 #define ERR_MESSAGE_LT_PARENTHESES                      "Expected a left parentheses."
 #define ERR_MESSAGE_SET_IF_IFELSE_WHILE                 "Expected the token 'set', 'if', 'ifelse' or 'while'."
+#define ERR_MESSAGE_LT_PARENTHESES_IDENTIFIER_NUMBER    "Expected a left parentheses, an identifier or a number."
 
 /**
  * Function that handles the printing of codes for reserved words.
@@ -514,130 +515,136 @@ void tryToGoForwardInTheParsing(){
 //     expr();
 // }
 
-// void handleSet(){
+void expr();
 
-//     readNextToken();
-//     printLastToken("handleSet");
+void factor(){
 
-//     if(global_curr_token_code == IDENTIFIER){
+    // Pop the 'factor' symbol.
+    pop();
 
-//         expr();
-//     }
-//     else{
+    switch(global_curr_token_code){
 
-//         printErrorMessage(ERR_CODE_IDENTIFIER, "handleSet", "Expected an identifier.");
-//     }
-// }
+        case IDENTIFIER:
 
-// void handleIf(){
+            // Apply the 'factor -> id' rule.
+            push(IDENTIFIER);
 
-//     readNextToken();
+            // Pop the identifier
+            pop();
 
-//     if(global_curr_token_code == SYMBOL_LT_PARENTHESES){
+            // Go forward in the input.
+            readNextToken();
 
-//         expression();
+            break;
 
-//         // If we saw a left parentheses, we should see a right parentheses afterwards.
-//         if(global_curr_token_code == SYMBOL_RT_PARENTHESES){
+        case SYMBOL_LT_PARENTHESES:
 
-//             opt_stmts();
-//         }
-//         else{
+            // Apply the 'factor -> (expr)' rule.
+            push(SYMBOL_RT_PARENTHESES); 
+            push(NON_TERMINAL_EXPR);
+            push(SYMBOL_LT_PARENTHESES);
 
-//             printErrorMessage(ERR_CODE_RT_PARENTHESES, "handleIf", "Expected a right parentheses.");
-//         }
-//     }
-//     else{
+            // Pop the left parentheses
+            pop();  
 
-//         printErrorMessage(ERR_CODE_LT_PARENTHESES, "handleIf", "Expected a left parentheses.");
-//     }
-// }
+            // Go forward in the input.
+            readNextToken();
 
-// void handleIfElse(){
+            expr();      
 
-//     readNextToken();
+            break;
 
-//     if(global_curr_token_code == SYMBOL_LT_PARENTHESES){
+        case INTEGER_NUMBER:
 
-//         expression();
+            // Apply the 'factor -> num' rule.
+            push(INTEGER_NUMBER);
 
-//         // If we saw a left parentheses, we should see a right parentheses afterwards.
-//         if(global_curr_token_code == SYMBOL_RT_PARENTHESES){
+            // Pop the integer number
+            pop();
 
-//             opt_stmts();
-//             opt_stmts();
-//         }
-//         else{
+            // Go forward in the input.
+            readNextToken();
 
-//             printErrorMessage(ERR_CODE_RT_PARENTHESES, "handleIf", "Expected a right parentheses.");
-//         }
-//     }
-//     else{
+            break;
+    }
+}
 
-//         printErrorMessage(ERR_CODE_LT_PARENTHESES, "handleIf", "Expected a left parentheses.");
-//     }
-// }
+void term(){
 
-// void handleWhile(){
+    // Pop the 'term' symbol.
+    pop();
 
-//     readNextToken();
+    switch(global_curr_token_code){
 
-//     if(global_curr_token_code == SYMBOL_LT_PARENTHESES){
+        case IDENTIFIER:
+        case SYMBOL_LT_PARENTHESES:
+        case INTEGER_NUMBER:
 
-//         expression();
+            // Apply the 'term -> factor term_' rule.
 
-//         // If we saw a left parentheses, we should see a right parentheses afterwards.
-//         if(global_curr_token_code == SYMBOL_RT_PARENTHESES){
+            push(NON_TERMINAL_TERM_);
+            push(NON_TERMINAL_FACTOR);
 
-//             opt_stmts();
-//         }
-//         else{
+            factor();
 
-//             printErrorMessage(ERR_CODE_RT_PARENTHESES, "handleIf", "Expected a right parentheses.");
-//         }
-//     }
-//     else{
+            break;
 
-//         printErrorMessage(ERR_CODE_LT_PARENTHESES, "handleIf", "Expected a left parentheses.");
-//     }
-// }
+        default:
 
-// void stmt(void caller()){
-
-//     // If you came from 'instr', DO NOT read a token here.
-//     // The token was read in that caller function.
-//     if(caller != stmt_lst && caller != instr){
-
-//         readNextToken();
-//         printLastToken("stmt");
-//     }
-
-//     switch(global_curr_token_code){
-
-//         case RES_WORD_SET:
-//             handleSet();
-//             break;
-
-//         case RES_WORD_IF:
-//             handleIf();
-//             break;
-
-//         case RES_WORD_IFELSE:
-//             handleIfElse();
-//             break;
-
-//         case RES_WORD_WHILE:
-//             handleWhile();
-//             break;
-
-//         default:
-//             printErrorMessage(ERR_CODE_SET_IF_IFELSE_WHILE, "stmt", "Expected one of 'set', 'if', 'ifelse' and 'while'.");
-//     }
-// }
+            printErrorMessage(ERR_CODE_LT_PARENTHESES_IDENTIFIER_NUMBER, "term()", ERR_MESSAGE_LT_PARENTHESES_IDENTIFIER_NUMBER);
+    }
+}
 
 void expresion(){
 
-    
+    // Pop the 'expresion' symbol.
+    pop();
+
+    switch(global_curr_token_code){
+
+        case IDENTIFIER:
+        case SYMBOL_LT_PARENTHESES:
+        case INTEGER_NUMBER:
+            
+            // Apply the 'expresion -> expr expresion_' rule.
+
+            push(NON_TERMINAL_EXPRESION_);
+            push(NON_TERMINAL_EXPR);
+
+            expr();
+
+            break;
+
+        default:
+
+            printErrorMessage(ERR_CODE_LT_PARENTHESES_IDENTIFIER_NUMBER, "expresion()", ERR_MESSAGE_LT_PARENTHESES_IDENTIFIER_NUMBER);
+    }
+}
+
+void expr(){
+
+    // Pop the 'expr' symbol.
+    pop();
+
+    switch(global_curr_token_code){
+
+        case IDENTIFIER:
+        case SYMBOL_LT_PARENTHESES:
+        case INTEGER_NUMBER:
+            
+            // Apply the 'expr -> term expr_' rule.
+
+            push(NON_TERMINAL_EXPR_);
+            push(NON_TERMINAL_TERM);
+
+            term();
+
+            break;
+
+        default:
+
+            printErrorMessage(ERR_CODE_LT_PARENTHESES_IDENTIFIER_NUMBER, "expr()", ERR_MESSAGE_LT_PARENTHESES_IDENTIFIER_NUMBER);
+    }
 }
 
 void stmt(){
@@ -649,37 +656,37 @@ void stmt(){
 
         case RES_WORD_SET:
             
-            // Apply the rule 'stmt -> set id expr'
+            // Apply the rule 'stmt -> set id expr'.
             push(NON_TERMINAL_EXPR);
             push(IDENTIFIER);
             push(RES_WORD_SET);
 
-            // Pop the 'set' token
+            // Pop the 'set' token.
             pop();
 
-            // Go forward in the input
+            // Go forward in the input.
             readNextToken();
 
             if(global_curr_token_code == IDENTIFIER){
                 
-                // Pop the identifier
+                // Pop the identifier.
                 pop();
 
-                // Go forward in the input
+                // Go forward in the input.
                 readNextToken();
 
                 expr();
             }
             else{
 
-                printErrorMessage(ERR_CODE_IDENTIFIER, "stmt", ERR_MESSAGE_IDENTIFIER);
+                printErrorMessage(ERR_CODE_IDENTIFIER, "stmt()", ERR_MESSAGE_IDENTIFIER);
             }
 
             break;
 
         case RES_WORD_IF:
 
-            // Apply the rule 'stmt -> if (expresion) opt_stmts'
+            // Apply the rule 'stmt -> if (expresion) opt_stmts'.
 
             push(NON_TERMINAL_OPT_STMTS);
             push(SYMBOL_RT_PARENTHESES);
@@ -687,25 +694,25 @@ void stmt(){
             push(SYMBOL_LT_PARENTHESES);
             push(RES_WORD_IF);
 
-            // Pop the 'if' token
+            // Pop the 'if' token.
             pop();
 
-            // Go forward in the input
+            // Go forward in the input.
             readNextToken();
 
             if(global_curr_token_code == SYMBOL_LT_PARENTHESES){
                 
-                // Pop the left parentheses
+                // Pop the left parentheses.
                 pop();  
 
-                // Go forward in the input
+                // Go forward in the input.
                 readNextToken();
 
                 expresion();
             }
             else{
 
-                printErrorMessage(ERR_CODE_LT_PARENTHESES, "stmt", ERR_MESSAGE_LT_PARENTHESES);
+                printErrorMessage(ERR_CODE_LT_PARENTHESES, "stmt()", ERR_MESSAGE_LT_PARENTHESES);
             }
 
             break;
@@ -746,7 +753,7 @@ void stmt(){
 
         case RES_WORD_WHILE:
 
-            // Apply the rule 'stmt -> while (expresion) opt_stmts'
+            // Apply the rule 'stmt -> while (expresion) opt_stmts'.
 
             push(NON_TERMINAL_OPT_STMTS);
             push(SYMBOL_RT_PARENTHESES);
@@ -754,38 +761,38 @@ void stmt(){
             push(SYMBOL_LT_PARENTHESES);
             push(RES_WORD_WHILE);
 
-            // Pop the 'while' token
+            // Pop the 'while' token.
             pop();
 
-            // Go forward in the input
+            // Go forward in the input.
             readNextToken();
 
             if(global_curr_token_code == SYMBOL_LT_PARENTHESES){
                 
-                // Pop the left parentheses
+                // Pop the left parentheses.
                 pop();  
 
-                // Go forward in the input
+                // Go forward in the input.
                 readNextToken();
 
                 expresion();
             }
             else{
 
-                printErrorMessage(ERR_CODE_LT_PARENTHESES, "stmt", ERR_MESSAGE_LT_PARENTHESES);
+                printErrorMessage(ERR_CODE_LT_PARENTHESES, "stmt()", ERR_MESSAGE_LT_PARENTHESES);
             }
 
             break;
     
         default:
 
-            printErrorMessage(ERR_CODE_SET_IF_IFELSE_WHILE, "stmt", ERR_MESSAGE_SET_IF_IFELSE_WHILE);   
+            printErrorMessage(ERR_CODE_SET_IF_IFELSE_WHILE, "stmt()", ERR_MESSAGE_SET_IF_IFELSE_WHILE);   
     }
 }
 
 void instr(){
 
-    // Pop the 'instr' symbol
+    // Pop the 'instr' symbol.
     pop();
 
     switch(global_curr_token_code){
@@ -801,18 +808,17 @@ void instr(){
 
         case SYMBOL_SEMI_COLON:
 
-            // Go forward in the input
-            readNextToken();
+            // Do nothing.
             break;
 
         default:
-            printErrorMessage(ERR_CODE_SET_IF_IFELSE_WHILE_SEMICOLON, "instr", ERR_MESSAGE_SET_IF_IFELSE_WHILE_SEMI_COLON);
+            printErrorMessage(ERR_CODE_SET_IF_IFELSE_WHILE_SEMICOLON, "instr()", ERR_MESSAGE_SET_IF_IFELSE_WHILE_SEMI_COLON);
     }
 }
 
 void stmt_lst(){
 
-    // Pop the 'stmt_lst' symbol
+    // Pop the 'stmt_lst' symbol.
     pop();
 
     switch(global_curr_token_code){
@@ -823,7 +829,7 @@ void stmt_lst(){
         case RES_WORD_WHILE:
         case SYMBOL_SEMI_COLON:
 
-            // Apply the rule stmt_lst -> instr stmt_lst
+            // Apply the rule 'stmt_lst -> instr stmt_lst'.
             push(NON_TERMINAL_STMT_LST);
             push(NON_TERMINAL_INSTR);
 
@@ -833,7 +839,7 @@ void stmt_lst(){
         case SYMBOL_RT_BRACKET:
 
             // This corresponds to the rule stmt_lst -> epsilon.
-            // Do nothing
+            // Do nothing.
 
             break;
     }
@@ -843,7 +849,7 @@ void opt_stmts(){
 
     readNextToken();
 
-    // Pop the 'opt_stmts' symbol
+    // Pop the 'opt_stmts' symbol.
     pop();
 
     switch(global_curr_token_code){
@@ -864,25 +870,25 @@ void opt_stmts(){
             push(NON_TERMINAL_STMT_LST);
             push(SYMBOL_LT_BRACKET);
 
-            // Consume the left bracket
+            // Consume the left bracket.
             pop();
             readNextToken();
 
-            // Go to stmt_lst
+            // Go to stmt_lst.
             stmt_lst();
             break;
 
         default:
-            printErrorMessage(ERR_CODE_SET_IF_IFELSE_WHILE_SEMICOLON_LT_BRACKET, "opt_stmts", "Expected the token 'set', 'if', 'ifelse', 'while', ';' or '{'.");
+            printErrorMessage(ERR_CODE_SET_IF_IFELSE_WHILE_SEMICOLON_LT_BRACKET, "opt_stmts()", "Expected the token 'set', 'if', 'ifelse', 'while', ';' or '{'.");
     }
 }
 
 void prog(){
 
-    // Read the next token
+    // Read the next token.
     readNextToken();
 
-    // If the rule applies
+    // If the rule applies.
     if(top() == NON_TERMINAL_PROG && global_curr_token_code == RES_WORD_PROGRAM){
 
         // Change the current stack top for the right side of the rule.
@@ -901,20 +907,20 @@ void prog(){
 
         if(top() == IDENTIFIER && global_curr_token_code == IDENTIFIER){
 
-            // Pop the identifier
+            // Pop the identifier.
             pop();
 
-            // Go to opt_stmts
+            // Go to opt_stmts.
             opt_stmts();
         }
         else{
 
-            printErrorMessage(ERR_CODE_IDENTIFIER, "prog", ERR_MESSAGE_IDENTIFIER);
+            printErrorMessage(ERR_CODE_IDENTIFIER, "prog()", ERR_MESSAGE_IDENTIFIER);
         }
     }
     else{
 
-        printErrorMessage(ERR_CODE_PROGRAM, "prog", ERR_MESSAGE_PROGRAM);
+        printErrorMessage(ERR_CODE_PROGRAM, "prog()", ERR_MESSAGE_PROGRAM);
     }
 }
 
@@ -922,7 +928,7 @@ void handleInput(int argc, char **argv){
 
     if(argc > 1){
 
-        // Open the input file
+        // Open the input file.
         yyin = fopen(argv[1], "r");
     }
     else{
