@@ -763,38 +763,44 @@ void stmt(){
             push(SYMBOL_LT_PARENTHESES);
             push(RES_WORD_IF);
 
-            // Pop the 'if' token.
-            pop();
-
-            // Go forward in the input.
-            readNextToken();
-
-            if(global_curr_token_code == SYMBOL_LT_PARENTHESES){
+            if(top() == RES_WORD_IF && global_curr_token_code == RES_WORD_IF){
                 
-                // Pop the left parentheses.
-                pop();  
+                // Pop the 'if' token.
+                pop();
 
                 // Go forward in the input.
                 readNextToken();
 
-                expresion();
-
-                // We should see a right parentheses now
-                if(global_curr_token_code == SYMBOL_RT_PARENTHESES){
-
-                    // Pop the right parentheses.
+                if(top() == SYMBOL_LT_PARENTHESES && global_curr_token_code == SYMBOL_LT_PARENTHESES){
+                    
+                    // Pop the left parentheses.
                     pop();  
 
-                    opt_stmts();
+                    // Go forward in the input.
+                    readNextToken();
+
+                    expresion();
+
+                    // We should see a right parentheses now
+                    if(top() == SYMBOL_RT_PARENTHESES && global_curr_token_code == SYMBOL_RT_PARENTHESES){
+
+                        // Pop the right parentheses.
+                        pop();  
+
+                        // Go forward in the input.
+                        readNextToken();
+
+                        opt_stmts();
+                    }
+                    else{
+
+                        printErrorMessage(ERR_CODE_RT_PARENTHESES, "stmt()", ERR_MESSAGE_RT_PARENTHESES);
+                    }
                 }
                 else{
 
-                    printErrorMessage(ERR_CODE_RT_PARENTHESES, "stmt()", ERR_MESSAGE_RT_PARENTHESES);
+                    printErrorMessage(ERR_CODE_LT_PARENTHESES, "stmt()", ERR_MESSAGE_LT_PARENTHESES);
                 }
-            }
-            else{
-
-                printErrorMessage(ERR_CODE_LT_PARENTHESES, "stmt()", ERR_MESSAGE_LT_PARENTHESES);
             }
 
             break;
@@ -816,7 +822,8 @@ void stmt(){
             // Go forward in the input
             readNextToken();
 
-            if(global_curr_token_code == SYMBOL_LT_PARENTHESES){
+            if(top() == SYMBOL_LT_PARENTHESES 
+                && global_curr_token_code == SYMBOL_LT_PARENTHESES){
                 
                 // Pop the left parentheses
                 pop();  
@@ -825,12 +832,31 @@ void stmt(){
                 readNextToken();
 
                 expresion();
-                opt_stmts();
-                opt_stmts();
+
+                if(top() == SYMBOL_RT_PARENTHESES 
+                    && global_curr_token_code == SYMBOL_RT_PARENTHESES){
+
+                    // Pop the right parentheses
+                    pop();
+
+                    // Go forward in the input.
+                    readNextToken();
+
+                    opt_stmts();
+
+                    // Go forward in the input.
+                    readNextToken();
+
+                    opt_stmts();
+                }
+                else{
+
+                    printErrorMessage(ERR_CODE_RT_PARENTHESES, "stmt()", ERR_MESSAGE_RT_PARENTHESES);
+                }
             }
             else{
 
-                printErrorMessage(ERR_CODE_LT_PARENTHESES, "stmt", ERR_MESSAGE_LT_PARENTHESES);
+                printErrorMessage(ERR_CODE_LT_PARENTHESES, "stmt()", ERR_MESSAGE_LT_PARENTHESES);
             }
 
             break;
@@ -851,7 +877,7 @@ void stmt(){
             // Go forward in the input.
             readNextToken();
 
-            if(global_curr_token_code == SYMBOL_LT_PARENTHESES){
+            if(top() == SYMBOL_LT_PARENTHESES && global_curr_token_code == SYMBOL_LT_PARENTHESES){
                 
                 // Pop the left parentheses.
                 pop();  
@@ -860,7 +886,21 @@ void stmt(){
                 readNextToken();
 
                 expresion();
-                opt_stmts();
+
+                if(global_curr_token_code == SYMBOL_RT_PARENTHESES){
+                    
+                    // Pop the right parentheses.
+                    pop();
+
+                    // Go forward in the input.
+                    readNextToken();
+
+                    opt_stmts();
+                }
+                else{
+
+                    printErrorMessage(ERR_CODE_RT_PARENTHESES, "stmt()", ERR_MESSAGE_RT_PARENTHESES);
+                }
             }
             else{
 
@@ -891,11 +931,16 @@ void instr(){
         case RES_WORD_WHILE:
 
             // Apply the rule 'instr -> stmt;'
-
+            
+            push(SYMBOL_SEMI_COLON);
             push(NON_TERMINAL_STMT);
             stmt();
 
-            if(global_curr_token_code == SYMBOL_SEMI_COLON){
+            if(top() == SYMBOL_SEMI_COLON 
+                && global_curr_token_code == SYMBOL_SEMI_COLON){
+                    
+                // Pop the ';'.
+                pop();
 
                 // Go forward in the input
                 readNextToken();
@@ -958,8 +1003,6 @@ void opt_stmts(){
     // Pop the 'opt_stmts' symbol.
     pop();
 
-    readNextToken();
-
     switch(global_curr_token_code){
 
         case RES_WORD_SET:
@@ -988,7 +1031,8 @@ void opt_stmts(){
             stmt_lst();
 
             // We should now see a right bracket
-            if(global_curr_token_code == SYMBOL_RT_BRACKET){
+            if(top() == SYMBOL_RT_BRACKET 
+                && global_curr_token_code == SYMBOL_RT_BRACKET){
                 
                 // Pop the right bracket
                 pop();
@@ -1013,9 +1057,6 @@ void opt_stmts(){
  */ 
 void prog(){
 
-    // Read the next token in the input
-    readNextToken();
-
     // If the rule applies.
     if(top() == NON_TERMINAL_PROG && global_curr_token_code == RES_WORD_PROGRAM){
 
@@ -1039,6 +1080,9 @@ void prog(){
 
             // Pop the identifier.
             pop();
+
+            // Go forward in the input.
+            readNextToken();
 
             // Go to opt_stmts.
             opt_stmts();
@@ -1077,6 +1121,21 @@ void handleInput(int argc, char **argv){
     }
 }
 
+void parse(){
+
+    // Push the end-of-input symbol to the stack
+    push(SYMBOL_DOLLAR_SIGN);
+    
+    // Push the initial grammar symbol "prog" to the stack
+    push(NON_TERMINAL_PROG);
+
+    // Read the next token in the input
+    readNextToken();
+    
+    // Call the initial function
+    prog();
+}
+
 /**
  * Main function of the program.
  */ 
@@ -1106,14 +1165,7 @@ int main(int argc, char **argv){
 
     handleInput(argc, argv);
 
-    // Push the end-of-input symbol to the stack
-    push(SYMBOL_DOLLAR_SIGN);
-    
-    // Push the initial grammar symbol "prog" to the stack
-    push(NON_TERMINAL_PROG);
-    
-    // Call the initial function
-    prog();
+    parse();
     printf("sí.\n");
 
     printf("top() == %d\n", top());
