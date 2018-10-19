@@ -148,6 +148,10 @@ struct node{
 // linked list used as a stack.
 struct node* global_stack_head = NULL;
 
+// Global variable corresponding to the data of the stack's top
+// element.
+int global_stack_top_data = -1;
+
 /**
  * Function for pushing a new element to the stack.
  * 
@@ -168,6 +172,9 @@ void push(int data){
 
     // Assign the data
     tmp->data = data;
+
+    // Update the global variable storing the stack's top data
+    global_stack_top_data = data;
     
     // Assign the next node of the new node
     tmp->next = global_stack_head;
@@ -186,6 +193,9 @@ void pop(){
     
     // Move the head to the next node of the current head.
     global_stack_head = global_stack_head->next;
+
+    // Update the global variable storing the stack's top data
+    global_stack_top_data = global_stack_head->data;
 
     // Free the node corresponding to the old head.
     free(tmp);
@@ -896,7 +906,8 @@ void stmt_lst(){
         case SYMBOL_RT_BRACKET:
 
             // This corresponds to the rule stmt_lst -> epsilon.
-            // Do nothing.
+            // Pop the '}' token.
+            pop();
 
             break;
     }
@@ -1048,6 +1059,8 @@ int main(int argc, char **argv){
     // Call the initial function
     prog();
     printf("sí.\n");
+
+    printf("top() == %d\n", top());
 
     return 0;
 }
