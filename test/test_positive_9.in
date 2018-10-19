@@ -1,0 +1,9 @@
+program cuatro
+{
+    set x 3 + y;
+    if (x > y)
+    {
+        set y x + 1;
+        set x y + 2;
+    }
+}

@@ -134,51 +134,91 @@ ifelse                                                  { return RES_WORD_IFELSE
 
 // ################# DATA STRUCTURES #################
 
+/**
+ * Definition of a node for the linked-list 
+ * to be used as a stack
+ */
 struct node{
 
     int data;
     struct node* next;
 };
 
+// Global variable corresponding to the pointer to the head of the 
+// linked list used as a stack.
 struct node* global_stack_head = NULL;
 
+/**
+ * Function for pushing a new element to the stack.
+ * 
+ * @param data an integer corresponding to the data of the new
+ * member of the stack.
+ */ 
 void push(int data){
 
+    // Ask for memory for the new node
     struct node* tmp = (struct node*) malloc(sizeof(struct node));
 
+    // If the memory was not given
     if(tmp == NULL) {
 
         printf("Error while requesting memory for a new node!\n");
         exit(0);
     }
 
+    // Assign the data
     tmp->data = data;
+    
+    // Assign the next node of the new node
     tmp->next = global_stack_head;
+
+    // Assign the head to the new node
     global_stack_head = tmp;
 }
 
+/**
+ * Function for popping from the stack
+ */ 
 void pop(){
 
+    // Get a pointer to the current head.
     struct node* tmp = global_stack_head;
+    
+    // Move the head to the next node of the current head.
     global_stack_head = global_stack_head->next;
+
+    // Free the node corresponding to the old head.
     free(tmp);
 } 
 
+/**
+ * Function that retrieves the data of the top node 
+ * in the stack.
+ * 
+ * @returns the data of the top node in the stack.
+ */ 
 int top(){
 
     return global_stack_head->data;
 }  
 
+/**
+ * Function that prints the stack
+ */ 
 void printStack(){
 
-    struct node* current;
-    current = global_stack_head;
+    // Get a pointer to the current head.
+    struct node* current = global_stack_head;
+
 
     if(current != NULL){
-
+        
+        // Traverse the linked list
         do{
 
             printf("%d ", current->data);
+
+            // Move to the next node
             current = current->next;
 
         }while(current != NULL);
@@ -186,12 +226,14 @@ void printStack(){
         printf("\n");
     }
     else{
-
+        
+        // Let the user know that the stack is empty.
         printf("The stack is empty.\n");
     }
 }
 
 // Symbols for the stack
+
 // Non-terminals
 #define SYMBOL_DOLLAR_SIGN                      1000
 #define NON_TERMINAL_PROG                       1001
@@ -213,149 +255,28 @@ void printStack(){
 
 // Error codes
 
-#define ERR_CODE_RT_PARENTHESES                                 0
-#define ERR_CODE_LT_PARENTHESES_IDENTIFIER_NUMBER               1
-#define ERR_CODE_IDENTIFIER                                     2
-#define ERR_CODE_SET_IF_IFELSE_WHILE                            3
-#define ERR_CODE_SEMI_COLON                                     4
-#define ERR_CODE_RT_BRACKET                                     5
-#define ERR_CODE_PROGRAM                                        6
-#define ERR_CODE_LT_PARENTHESES                                 7
-#define ERR_CODE_SET_IF_IFELSE_WHILE_SEMICOLON_LT_BRACKET       8
-#define ERR_CODE_SET_IF_IFELSE_WHILE_SEMICOLON                  9
+#define ERR_CODE_RT_PARENTHESES                                         0
+#define ERR_CODE_LT_PARENTHESES_IDENTIFIER_NUMBER                       1
+#define ERR_CODE_IDENTIFIER                                             2
+#define ERR_CODE_SET_IF_IFELSE_WHILE                                    3
+#define ERR_CODE_SEMI_COLON                                             4
+#define ERR_CODE_RT_BRACKET                                             5
+#define ERR_CODE_PROGRAM                                                6
+#define ERR_CODE_LT_PARENTHESES                                         7
+#define ERR_CODE_SET_IF_IFELSE_WHILE_SEMICOLON_LT_BRACKET               8
+#define ERR_CODE_SET_IF_IFELSE_WHILE_SEMICOLON                          9
+#define ERR_CODE_RT_PARENTHESES_SEMICOLON_LT_GT_EQ_PLUS_MINUS           10
+#define ERR_CODE_LT_GT_EQ                                               11
 
 // Error messages
-#define ERR_MESSAGE_IDENTIFIER                          "Expected an identifier."
-#define ERR_MESSAGE_PROGRAM                             "Expected the token 'program'."
-#define ERR_MESSAGE_SET_IF_IFELSE_WHILE_SEMI_COLON      "Expected the token 'set', 'if', 'ifelse', 'while' or ';'."
-#define ERR_MESSAGE_LT_PARENTHESES                      "Expected a left parentheses."
-#define ERR_MESSAGE_SET_IF_IFELSE_WHILE                 "Expected the token 'set', 'if', 'ifelse' or 'while'."
-#define ERR_MESSAGE_LT_PARENTHESES_IDENTIFIER_NUMBER    "Expected a left parentheses, an identifier or a number."
-
-/**
- * Function that handles the printing of codes for reserved words.
- * 
- * @param reservedWordCode the code of the reserved word to handle
- * @returns the code of the reserved word to handle 
- */ 
-int getReservedWordCode(int reservedWordCode){
-
-    return reservedWordCode;
-}
-
-/**
- * Function that handles the printing of codes for symbols.
- * 
- * @param symbolCode the code of the symbol to handle
- * @returns the code of the symbol to handle 
- */ 
-int getSymbolCode(int symbolCode){
-
-    return symbolCode;    
-}
-
-/**
- * Function that handles the printing of codes for floating-point numbers.
- * 
- * @param floatingPointNumberCode the code of the floating-point number to handle
- * @returns the code of the floating-point number to handle 
- */ 
-int getFloatingPointNumberCode(int floatingPointNumberCode){
-
-    return floatingPointNumberCode;
-}
-
-/**
- * Function that handles the printing of codes for integer numbers.
- * 
- * @param integerNumberCode the code of the integer number to handle
- * @returns the code of the integer number to handle 
- */ 
-int getIntegerNumberCode(int integerNumberCode){
-
-    return integerNumberCode;
-}
-
-/**
- * Function that handles the printing of codes for identifiers.
- * 
- * @param identifierCode the code of the identifier to handle
- * @returns the code of the identifier to handle 
- */ 
-int getIdentifier(int identifierCode){
-
-    return identifierCode;
-}
-
-/**
- * Function for handling errors, i.e. tokens that are not recognized.
- */ 
-void handleError(){
-
-    //Just print the token
-    printf("%s", yytext);
-}
-
-/**
- * Function to handle non-printable tokens.
- * 
- * @param code the token code
- */ 
-void handleNonPrintableTokens(int code){
-
-    printf("%s", yytext);
-}
-
-/**
- * Function to handle printable tokens
- * 
- * @param code the token code
- */ 
-void handlePrintableTokens(int code){
-
-    // Compute the token's category.
-    int tokenCategory = code/TOKEN_CATEGORY_SIZE;
-
-    // Switch between the possible token categories.
-    switch(tokenCategory){
-
-        case 0:
-            printf("%d", getReservedWordCode(code));
-            break;
-
-        case 1:
-            printf(" %d", getSymbolCode(code));
-            break;
-
-        case 2:
-            printf("%d", getFloatingPointNumberCode(code));
-            break;
-
-        case 3:
-            printf("%d", getIntegerNumberCode(code));
-            break;
-
-        case 4:
-            printf("%d", getIdentifier(code));
-            break;
-
-        case 11:
-            handleError();
-    }
-}
-
-/**
- * Function that determines whether a token is a
- * printable character.
- * 
- * @param code the token code
- * @returns a positive number if the token is a 
- * printable character. Else, zero.
- */ 
-int isPrintableCharacter(int code){
-
-    return code >= 0;
-}
+#define ERR_MESSAGE_IDENTIFIER                                          "Expected an identifier."
+#define ERR_MESSAGE_PROGRAM                                             "Expected the token 'program'."
+#define ERR_MESSAGE_SET_IF_IFELSE_WHILE_SEMI_COLON                      "Expected the token 'set', 'if', 'ifelse', 'while' or ';'."
+#define ERR_MESSAGE_LT_PARENTHESES                                      "Expected a left parentheses."
+#define ERR_MESSAGE_SET_IF_IFELSE_WHILE                                 "Expected the token 'set', 'if', 'ifelse' or 'while'."
+#define ERR_MESSAGE_LT_PARENTHESES_IDENTIFIER_NUMBER                    "Expected a '(', an identifier or a number."
+#define ERR_MESSAGE_RT_PARENTHESES_SEMICOLON_LT_GT_EQ_PLUS_MINUS        "Expected a ')', ';', '<', '>', '=', '+' or '-' token."
+#define ERR_MESSAGE_LT_GT_EQ                                            "Expected a '<', '>' or '=' token."
 
 // ################# SYNTAX ANALYZER #################
 
@@ -363,11 +284,23 @@ int isPrintableCharacter(int code){
 int global_curr_token_code = -1;
 int global_curr_parsed_line = 1;
 
+/**
+ * Function that terminates the program.
+ * 
+ * @param exitCode the exit code to terminate this program with.
+ */ 
 void terminateProgram(int exitCode){
 
     exit(exitCode);
 }
 
+/**
+ * Function that prints an error message and calls the termination of the program.
+ * 
+ * @param errorCode The error code associated to this error.
+ * @param currFunction The name of the function in which the error occurred.
+ * @param errorMesssage A message to the user.
+ */ 
 void printErrorMessage(int errorCode, char* currFunction, char* errorMesssage){
 
     printf("Error #%d at input line %d, function '%s': %s\n", errorCode, global_curr_parsed_line, currFunction, errorMesssage);
@@ -375,11 +308,24 @@ void printErrorMessage(int errorCode, char* currFunction, char* errorMesssage){
     terminateProgram(1);
 }
 
+/**
+ * Function that prints the last read token.
+ * 
+ * @param readAtFunctionName the name of the function in which this token was read.
+ */ 
 void printLastToken(char *readAtFunctionName){
 
     printf("Read at function '%s'; currToken = '%s'; at line = %d; global_curr_token_code = %d\n", readAtFunctionName, yytext, global_curr_parsed_line, global_curr_token_code);
 }
 
+/**
+ * Function that determines whether a token is a
+ * printable character.
+ * 
+ * @param tokenCode the token code
+ * @returns a positive number if the token is a 
+ * printable character. Else, zero.
+ */ 
 int isPrintableToken(int tokenCode){
 
     return tokenCode >= 0;
@@ -391,132 +337,222 @@ int isPrintableToken(int tokenCode){
 void readNextToken(){
 
     do{
-        if(isPrintableToken(global_curr_token_code))
-            printf("1 token = %s\n", yytext);
+        // if(isPrintableToken(global_curr_token_code))
+        //     printf("1 token = %s\n", yytext);
 
         global_curr_token_code = yylex();
 
-        if(isPrintableToken(global_curr_token_code))
-            printf("2 token = %s\n", yytext);
+        // if(isPrintableToken(global_curr_token_code))
+        //     printf("2 token = %s\n", yytext);
 
         if(global_curr_token_code == NEW_LINE)
             global_curr_parsed_line++;
         
     } while(!isPrintableToken(global_curr_token_code));
-
-    // printLastToken("");
 }
 
-void tryToGoForwardInTheParsing(){
+void expr();
+void term();
+void factor();
 
-    while(top() == global_curr_token_code){
+/**
+ * Function for the 'term_' grammar symbol
+ */ 
+void term_(){
 
-        pop();
-        readNextToken();
+    // Pop the 'term_' symbol.
+    pop();
+
+    switch(global_curr_token_code){
+
+        case SYMBOL_RT_PARENTHESES:
+        case SYMBOL_SEMI_COLON:
+        case SYMBOL_LT:
+        case SYMBOL_GT:
+        case SYMBOL_EQ:
+        case SYMBOL_PLUS:
+        case SYMBOL_MINUS:
+
+            // Apply the rule 'term_ -> epsilon'.
+            // Do nothing.
+
+            break;
+
+        case SYMBOL_STAR:
+
+            // Apply the rule 'term_ -> * factor term_'.
+
+            push(NON_TERMINAL_TERM_);
+            push(NON_TERMINAL_FACTOR);
+            push(SYMBOL_STAR);
+
+            // Pop the '*' token.
+            pop();
+
+            // Go forward in the input.
+            readNextToken();
+
+            factor();
+            term_();
+
+            break;
+
+        case SYMBOL_FORWARD_SLASH:
+
+            // Apply the rule 'term_ -> / factor term_'.
+
+            push(NON_TERMINAL_TERM_);
+            push(NON_TERMINAL_FACTOR);
+            push(SYMBOL_FORWARD_SLASH);
+
+            // Pop the '/' token.
+            pop();
+
+            // Go forward in the input.
+            readNextToken();
+
+            factor();
+            term_();
+
+            break;
+
+        default:
+
+            printErrorMessage(ERR_CODE_RT_PARENTHESES_SEMICOLON_LT_GT_EQ_PLUS_MINUS, "term_()", ERR_MESSAGE_RT_PARENTHESES_SEMICOLON_LT_GT_EQ_PLUS_MINUS);
     }
 }
 
-// void expr();
-// void term();
-// void stmt_lst();
-// void opt_stmts();
-// void instr(void caller());
+/**
+ * Function for the 'expresion_' grammar symbol
+ */ 
+void expresion_(){
 
-// void factor(){
+    // Pop the 'expresion_' symbol.
+    pop();
 
-//     readNextToken();
-//     printLastToken("factor");
+    switch(global_curr_token_code){
 
-//     if(global_curr_token_code == SYMBOL_LT_PARENTHESES){
+        case SYMBOL_LT:
 
-//         expr();
-//         readNextToken();
+            // Apply the rule 'expresion_ -> < expr'.
+            push(NON_TERMINAL_EXPR);
+            push(SYMBOL_LT);
 
-//         // If we saw a left parentheses, we should see a right parentheses afterwards.
-//         if(global_curr_token_code != SYMBOL_RT_PARENTHESES){
+            // Pop the '<' token.
+            pop();
 
-//             printErrorMessage(ERR_CODE_RT_PARENTHESES, "factor", "Expected a right parentheses.");
-//         }
-//     } 
-//     // If we didn't see a left parentheses, we should've seen an identifier, 
-//     // an integer number or a right parentheses.
-//     else if(global_curr_token_code == IDENTIFIER || global_curr_token_code == INTEGER_NUMBER){
+            // Go forward in the input.
+            readNextToken();
 
-//         readNextToken();
+            expr();
+
+            break;
+
+        case SYMBOL_GT:
+
+            // Apply the rule 'expresion_ -> > expr'.
+            push(NON_TERMINAL_EXPR);
+            push(SYMBOL_GT);
+
+            // Pop the '>' token.
+            pop();
+
+            // Go forward in the input.
+            readNextToken();
+
+            expr();
+
+            break;
+
+        case SYMBOL_EQ:
+
+            // Apply the rule 'expresion_ -> = expr'.
+            push(NON_TERMINAL_EXPR);
+            push(SYMBOL_EQ);
+
+            // Pop the '=' token.
+            pop();
+
+            // Go forward in the input.
+            readNextToken();
+
+            expr();
+            break;
+
+        default:
+
+            printErrorMessage(ERR_CODE_LT_GT_EQ, "expresion_()", ERR_MESSAGE_LT_GT_EQ);
+    }
+}
+
+/**
+ * Function for the 'expr_' grammar symbol
+ */ 
+void expr_(){
+
+    // Pop the 'expr_' symbol.
+    pop();
+
+    switch(global_curr_token_code){
+
+        case SYMBOL_RT_PARENTHESES:
+        case SYMBOL_SEMI_COLON:
+        case SYMBOL_LT:
+        case SYMBOL_GT:
+        case SYMBOL_EQ:
+
+            // Apply the rule 'expr_ -> epsilon'.
+            // Do nothing.
+
+            break;
         
-//         if(global_curr_token_code == SYMBOL_RT_PARENTHESES){
+        case SYMBOL_PLUS:
+
+            // Apply the 'expr_ -> + term expr_' rule.
+
+            push(NON_TERMINAL_EXPR_);
+            push(NON_TERMINAL_TERM);
+            push(SYMBOL_PLUS);
             
-//             return;
-//         }
+            // Pop the plus symbol
+            pop();
+            
+            // Go forward in the input.
+            readNextToken();
 
-//         // return;
-//     }
-//     else{
+            term();
+            expr_();
 
-//         printErrorMessage(ERR_CODE_LT_PARENTHESES_IDENTIFIER_NUMBER, "factor", "Expected a left parentheses, an identifier or a number.");
-//     }
-// }
+            break;
 
-// void term_(){
+        case SYMBOL_MINUS:
 
-//     factor();
-//     term_();
-// }
+            // Apply the 'expr_ -> - term expr_' rule.
 
-// void expr_(){
+            push(NON_TERMINAL_EXPR_);
+            push(NON_TERMINAL_TERM);
+            push(SYMBOL_MINUS);
+            
+            // Pop the minus symbol
+            pop();
+            
+            // Go forward in the input.
+            readNextToken();
 
-//     if(global_curr_token_code == SYMBOL_PLUS || global_curr_token_code == SYMBOL_MINUS){
+            term();
+            expr_();
 
-//         term();
-//         expr_();
-//     }
-// }
+            break;
 
-// void term(){
+        default:
 
-//     factor();
-//     readNextToken();
+            printErrorMessage(ERR_CODE_RT_PARENTHESES_SEMICOLON_LT_GT_EQ_PLUS_MINUS, "expr_()", ERR_MESSAGE_RT_PARENTHESES_SEMICOLON_LT_GT_EQ_PLUS_MINUS);
+    }
+}
 
-//     if(global_curr_token_code == SYMBOL_STAR || global_curr_token_code == SYMBOL_FORWARD_SLASH){
-
-//         term_();
-//     }
-//     else if(global_curr_token_code == SYMBOL_SEMI_COLON){
-
-//         return;
-//     }
-// }
-
-// void expr(){
-
-//     term();
-
-//     if(global_curr_token_code == SYMBOL_SEMI_COLON){
-
-//         return;
-//     }
-//     // For parsing expressions inside statements
-//     else if(global_curr_token_code == SYMBOL_LT 
-//         || global_curr_token_code == SYMBOL_EQ
-//         || global_curr_token_code == SYMBOL_GT
-//         || global_curr_token_code == SYMBOL_RT_PARENTHESES){
-
-//         return;
-//     }
-//     else{
-
-//         expr_();
-//     }
-// }
-
-// void expression(){
-
-//     expr();
-//     expr();
-// }
-
-void expr();
-
+/**
+ * Function for the 'factor' grammar symbol
+ */ 
 void factor(){
 
     // Pop the 'factor' symbol.
@@ -569,6 +605,9 @@ void factor(){
     }
 }
 
+/**
+ * Function for the 'term' grammar symbol
+ */ 
 void term(){
 
     // Pop the 'term' symbol.
@@ -586,6 +625,7 @@ void term(){
             push(NON_TERMINAL_FACTOR);
 
             factor();
+            term_();
 
             break;
 
@@ -595,6 +635,9 @@ void term(){
     }
 }
 
+/**
+ * Function for the 'expresion' grammar symbol
+ */ 
 void expresion(){
 
     // Pop the 'expresion' symbol.
@@ -612,6 +655,7 @@ void expresion(){
             push(NON_TERMINAL_EXPR);
 
             expr();
+            expresion_();
 
             break;
 
@@ -621,6 +665,9 @@ void expresion(){
     }
 }
 
+/**
+ * Function for the 'expr' grammar symbol
+ */ 
 void expr(){
 
     // Pop the 'expr' symbol.
@@ -638,6 +685,7 @@ void expr(){
             push(NON_TERMINAL_TERM);
 
             term();
+            expr_();
 
             break;
 
@@ -647,6 +695,9 @@ void expr(){
     }
 }
 
+/**
+ * Function for the 'stmt' grammar symbol
+ */ 
 void stmt(){
 
     // Pop the 'stmt' symbol
@@ -790,6 +841,9 @@ void stmt(){
     }
 }
 
+/**
+ * Function for the 'instr' grammar symbol
+ */ 
 void instr(){
 
     // Pop the 'instr' symbol.
@@ -816,6 +870,9 @@ void instr(){
     }
 }
 
+/**
+ * Function for the 'stmt_lst' grammar symbol
+ */ 
 void stmt_lst(){
 
     // Pop the 'stmt_lst' symbol.
@@ -845,6 +902,9 @@ void stmt_lst(){
     }
 }
 
+/**
+ * Function for the 'opt_stmts' grammar symbol
+ */ 
 void opt_stmts(){
 
     readNextToken();
@@ -883,6 +943,9 @@ void opt_stmts(){
     }
 }
 
+/**
+ * Entry function of the LL1 grammar corresponding to its first rule: 'prog'.
+ */ 
 void prog(){
 
     // Read the next token.
@@ -898,10 +961,10 @@ void prog(){
         pop();
         push(NON_TERMINAL_OPT_STMTS);
         push(IDENTIFIER);
+        push(RES_WORD_PROGRAM);
 
-        // Push and pop or do nothing
-        // push(RES_WORD_PROGRAM);
-        // pop();
+        // Pop the 'program' reserved word
+        pop();
 
         readNextToken();
 
@@ -924,15 +987,25 @@ void prog(){
     }
 }
 
+/**
+ * Function for handling input either from arguments to the main() function
+ * or from standard input (e.g. redirection to file.)
+ * 
+ * @param argc the amount of arguments that the main() function received.
+ * @param argv the pointer to pointer to char corresponding to the arguments 
+ * that the main() function received.
+ */ 
 void handleInput(int argc, char **argv){
 
+    // If an input file was passed
     if(argc > 1){
 
         // Open the input file.
         yyin = fopen(argv[1], "r");
     }
     else{
-
+        
+        // Else, just use standard input
         yyin = stdin;
     }
 }

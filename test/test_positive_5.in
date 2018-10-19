@@ -1,0 +1,4 @@
+program MyProgram1 
+{
+    set var1 (var1 * 2) + 1;
+}

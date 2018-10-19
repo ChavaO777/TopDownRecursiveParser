@@ -1,0 +1,2 @@
+program tres
+    set x 3 + y;
