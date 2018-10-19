@@ -293,6 +293,7 @@ int top(){
 #define ERR_MESSAGE_LT_PARENTHESES_IDENTIFIER_NUMBER                    "Expected a '(', an identifier or a number."
 #define ERR_MESSAGE_RT_PARENTHESES_SEMICOLON_LT_GT_EQ_PLUS_MINUS        "Expected a ')', ';', '<', '>', '=', '+' or '-' token."
 #define ERR_MESSAGE_LT_GT_EQ                                            "Expected a '<', '>' or '=' token."
+#define ERR_MESSAGE_SEMICOLON                                           "Expected a ';'."
 
 // ################# SYNTAX ANALYZER #################
 
@@ -889,13 +890,27 @@ void instr(){
         case RES_WORD_IFELSE:
         case RES_WORD_WHILE:
 
+            // Apply the rule 'instr -> stmt;'
+
             push(NON_TERMINAL_STMT);
             stmt();
+
+            if(global_curr_token_code == SYMBOL_SEMI_COLON){
+
+                // Go forward in the input
+                readNextToken();
+            }
+            else{
+
+                printErrorMessage(ERR_CODE_SEMI_COLON, "instr()", ERR_MESSAGE_SEMICOLON);
+            }
+
             break;
 
         case SYMBOL_SEMI_COLON:
 
             // Do nothing.
+            // This semicolon could be the end of a program
             break;
 
         default:
@@ -917,16 +932,16 @@ void stmt_lst(){
         case RES_WORD_IF:
         case RES_WORD_IFELSE:
         case RES_WORD_WHILE:
-        // case SYMBOL_SEMI_COLON:
+        case SYMBOL_SEMI_COLON:
 
             // Apply the rule 'stmt_lst -> instr stmt_lst'.
             push(NON_TERMINAL_STMT_LST);
             push(NON_TERMINAL_INSTR);
 
             instr();
+            stmt_lst();
             break;
         
-        case SYMBOL_SEMI_COLON:
         case SYMBOL_RT_BRACKET:
 
             // This corresponds to the rule stmt_lst -> epsilon.
@@ -965,6 +980,8 @@ void opt_stmts(){
 
             // Consume the left bracket.
             pop();
+
+            // Go forward in the input
             readNextToken();
 
             // Go to stmt_lst.
@@ -975,6 +992,13 @@ void opt_stmts(){
                 
                 // Pop the right bracket
                 pop();
+
+                // Check if this is not the end of the input
+                if(top() != SYMBOL_DOLLAR_SIGN){
+
+                    // Go forward in the input
+                    readNextToken();
+                }
             }
 
             break;
@@ -989,7 +1013,7 @@ void opt_stmts(){
  */ 
 void prog(){
 
-    // Read the next token.
+    // Read the next token in the input
     readNextToken();
 
     // If the rule applies.
@@ -998,8 +1022,10 @@ void prog(){
         // Change the current stack top for the right side of the rule.
         // Push the right side of the rule to the stack in reverse order.
         // prog -> program id opt_stmts
-        
+
+        // Pop the 'prog' symbol
         pop();
+        
         push(NON_TERMINAL_OPT_STMTS);
         push(IDENTIFIER);
         push(RES_WORD_PROGRAM);
