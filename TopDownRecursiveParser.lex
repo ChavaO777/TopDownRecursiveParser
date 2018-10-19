@@ -24,7 +24,6 @@
 
 %{
 /* Reserved words */
-#define RES_WORD_FUNCTION       0
 #define RES_WORD_PROCEDURE      1
 #define RES_WORD_FOR            2
 #define RES_WORD_WHILE          3
@@ -37,6 +36,7 @@
 #define RES_WORD_SET            10
 #define RES_WORD_IF             11
 #define RES_WORD_IFELSE         12
+#define RES_WORD_FUNCTION       13
 
 /* Symbols */
 #define SYMBOL_COLON_EQ         100 
@@ -282,6 +282,7 @@ int top(){
 #define ERR_CODE_SET_IF_IFELSE_WHILE_SEMICOLON                          9
 #define ERR_CODE_RT_PARENTHESES_SEMICOLON_LT_GT_EQ_PLUS_MINUS           10
 #define ERR_CODE_LT_GT_EQ                                               11
+#define ERR_CODE_UNEXPECTED_END_OF_INPUT                                12
 
 // Error messages
 #define ERR_MESSAGE_IDENTIFIER                                          "Expected an identifier."
@@ -294,6 +295,7 @@ int top(){
 #define ERR_MESSAGE_RT_PARENTHESES_SEMICOLON_LT_GT_EQ_PLUS_MINUS        "Expected a ')', ';', '<', '>', '=', '+' or '-' token."
 #define ERR_MESSAGE_LT_GT_EQ                                            "Expected a '<', '>' or '=' token."
 #define ERR_MESSAGE_SEMICOLON                                           "Expected a ';'."
+#define ERR_MESSAGE_UNEXPECTED_END_OF_INPUT                             "Unexpected end of input."
 
 // ################# SYNTAX ANALYZER #################
 
@@ -357,7 +359,18 @@ void readNextToken(){
         if(isPrintableToken(global_curr_token_code))
             printf("1 token = %s\n", yytext);
 
-        global_curr_token_code = yylex();
+        int readInt = yylex();
+
+        printf("readInt = %d\n", readInt);
+
+        if(readInt != END_OF_FILE){
+
+            global_curr_token_code = readInt;
+        }
+        else{
+
+            printErrorMessage(ERR_CODE_UNEXPECTED_END_OF_INPUT, "readNextToken()", ERR_MESSAGE_UNEXPECTED_END_OF_INPUT);
+        }
 
         if(isPrintableToken(global_curr_token_code))
             printf("2 token = %s\n", yytext);
@@ -1111,7 +1124,16 @@ void handleInput(int argc, char **argv){
     // If an input file was passed
     if(argc > 1){
 
-        // Open the input file.
+        // // Open the file
+        // FILE *pFile2 = fopen(argv[1], "a");
+
+        // // Append a '$' symbol to the end of the file
+        // fprintf(pFile2, "$");
+
+        // // Close the file
+        // fclose(pFile2);
+
+        // Open the input file for Lex
         yyin = fopen(argv[1], "r");
     }
     else{
