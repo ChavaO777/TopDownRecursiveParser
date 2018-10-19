@@ -1,5 +1,6 @@
 program MyProgram1 
 {
-    if (var1 < var2)
+    if (var1 < var2){
         set var1 var1 + 1;
+    };
 }

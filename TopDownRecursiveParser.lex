@@ -153,6 +153,37 @@ struct node* global_stack_head = NULL;
 int global_stack_top_data = -1;
 
 /**
+ * Function that prints the stack
+ */ 
+void printStack(){
+
+    // Get a pointer to the current head.
+    struct node* current = global_stack_head;
+
+    if(current != NULL){
+
+        printf("Stack: ");
+        
+        // Traverse the linked list
+        do{
+
+            printf("%d ", current->data);
+
+            // Move to the next node
+            current = current->next;
+
+        }while(current != NULL);
+
+        printf("\n");
+    }
+    else{
+        
+        // Let the user know that the stack is empty.
+        printf("The stack is empty.\n");
+    }
+}
+
+/**
  * Function for pushing a new element to the stack.
  * 
  * @param data an integer corresponding to the data of the new
@@ -191,6 +222,8 @@ void pop(){
     // Get a pointer to the current head.
     struct node* tmp = global_stack_head;
     
+    printf("pop -> %d\n", tmp->data);
+
     // Move the head to the next node of the current head.
     global_stack_head = global_stack_head->next;
 
@@ -199,6 +232,8 @@ void pop(){
 
     // Free the node corresponding to the old head.
     free(tmp);
+
+    printStack();
 } 
 
 /**
@@ -211,36 +246,6 @@ int top(){
 
     return global_stack_head->data;
 }  
-
-/**
- * Function that prints the stack
- */ 
-void printStack(){
-
-    // Get a pointer to the current head.
-    struct node* current = global_stack_head;
-
-
-    if(current != NULL){
-        
-        // Traverse the linked list
-        do{
-
-            printf("%d ", current->data);
-
-            // Move to the next node
-            current = current->next;
-
-        }while(current != NULL);
-
-        printf("\n");
-    }
-    else{
-        
-        // Let the user know that the stack is empty.
-        printf("The stack is empty.\n");
-    }
-}
 
 // Symbols for the stack
 
@@ -282,7 +287,8 @@ void printStack(){
 #define ERR_MESSAGE_IDENTIFIER                                          "Expected an identifier."
 #define ERR_MESSAGE_PROGRAM                                             "Expected the token 'program'."
 #define ERR_MESSAGE_SET_IF_IFELSE_WHILE_SEMI_COLON                      "Expected the token 'set', 'if', 'ifelse', 'while' or ';'."
-#define ERR_MESSAGE_LT_PARENTHESES                                      "Expected a left parentheses."
+#define ERR_MESSAGE_LT_PARENTHESES                                      "Expected a '('."
+#define ERR_MESSAGE_RT_PARENTHESES                                      "Expected a ')'."
 #define ERR_MESSAGE_SET_IF_IFELSE_WHILE                                 "Expected the token 'set', 'if', 'ifelse' or 'while'."
 #define ERR_MESSAGE_LT_PARENTHESES_IDENTIFIER_NUMBER                    "Expected a '(', an identifier or a number."
 #define ERR_MESSAGE_RT_PARENTHESES_SEMICOLON_LT_GT_EQ_PLUS_MINUS        "Expected a ')', ';', '<', '>', '=', '+' or '-' token."
@@ -347,13 +353,13 @@ int isPrintableToken(int tokenCode){
 void readNextToken(){
 
     do{
-        // if(isPrintableToken(global_curr_token_code))
-        //     printf("1 token = %s\n", yytext);
+        if(isPrintableToken(global_curr_token_code))
+            printf("1 token = %s\n", yytext);
 
         global_curr_token_code = yylex();
 
-        // if(isPrintableToken(global_curr_token_code))
-        //     printf("2 token = %s\n", yytext);
+        if(isPrintableToken(global_curr_token_code))
+            printf("2 token = %s\n", yytext);
 
         if(global_curr_token_code == NEW_LINE)
             global_curr_parsed_line++;
@@ -364,6 +370,7 @@ void readNextToken(){
 void expr();
 void term();
 void factor();
+void opt_stmts();
 
 /**
  * Function for the 'term_' grammar symbol
@@ -770,6 +777,19 @@ void stmt(){
                 readNextToken();
 
                 expresion();
+
+                // We should see a right parentheses now
+                if(global_curr_token_code == SYMBOL_RT_PARENTHESES){
+
+                    // Pop the right parentheses.
+                    pop();  
+
+                    opt_stmts();
+                }
+                else{
+
+                    printErrorMessage(ERR_CODE_RT_PARENTHESES, "stmt()", ERR_MESSAGE_RT_PARENTHESES);
+                }
             }
             else{
 
@@ -804,6 +824,8 @@ void stmt(){
                 readNextToken();
 
                 expresion();
+                opt_stmts();
+                opt_stmts();
             }
             else{
 
@@ -837,6 +859,7 @@ void stmt(){
                 readNextToken();
 
                 expresion();
+                opt_stmts();
             }
             else{
 
@@ -894,7 +917,7 @@ void stmt_lst(){
         case RES_WORD_IF:
         case RES_WORD_IFELSE:
         case RES_WORD_WHILE:
-        case SYMBOL_SEMI_COLON:
+        // case SYMBOL_SEMI_COLON:
 
             // Apply the rule 'stmt_lst -> instr stmt_lst'.
             push(NON_TERMINAL_STMT_LST);
@@ -903,12 +926,11 @@ void stmt_lst(){
             instr();
             break;
         
+        case SYMBOL_SEMI_COLON:
         case SYMBOL_RT_BRACKET:
 
             // This corresponds to the rule stmt_lst -> epsilon.
-            // Pop the '}' token.
-            pop();
-
+            // Do nothing. Pop the right bracket in the caller function.
             break;
     }
 }
@@ -918,10 +940,10 @@ void stmt_lst(){
  */ 
 void opt_stmts(){
 
-    readNextToken();
-
     // Pop the 'opt_stmts' symbol.
     pop();
+
+    readNextToken();
 
     switch(global_curr_token_code){
 
@@ -947,6 +969,14 @@ void opt_stmts(){
 
             // Go to stmt_lst.
             stmt_lst();
+
+            // We should now see a right bracket
+            if(global_curr_token_code == SYMBOL_RT_BRACKET){
+                
+                // Pop the right bracket
+                pop();
+            }
+
             break;
 
         default:
