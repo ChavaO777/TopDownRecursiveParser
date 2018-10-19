@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/a.out",
             "args": [
-                "test/test_positive_set_product.in"
+                "test/tests_oliart/test2.in"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
